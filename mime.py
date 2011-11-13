@@ -14,34 +14,8 @@ shared mime database package.
 import os
 from fnmatch import fnmatch
 from xml.dom import minidom, XML_NAMESPACE
+from . import xdg
 from ..basemime import BaseMime
-
-FREEDESKTOP_NS = "http://www.freedesktop.org/standards/shared-mime-info"
-
-HOME = os.path.expanduser("~")
-XDG_DATA_HOME = os.environ.get("XDG_DATA_HOME", os.path.join(HOME, ".local", "share"))
-XDG_DATA_DIRS = set([XDG_DATA_HOME] + os.environ.get("XDG_DATA_DIRS", "/usr/local/share:/usr/share").split(":"))
-# XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.path.join(HOME, ".config"))
-# XDG_CONFIG_DIRS = set([XDG_CONFIG_HOME] + os.environ.get("XDG_CONFIG_DIRS", "/etc/xdg").split(":"))
-# XDG_CACHE_HOME  = os.environ.get("XDG_CACHE_HOME", os.path.join(HOME, ".cache"))
-
-def getFiles(name):
-	ret = []
-	for dir in XDG_DATA_DIRS:
-		path = os.path.join(dir, "mime", name)
-		if os.path.exists(path):
-			ret.append(path)
-	return ret
-
-def getMimeFiles(name):
-	paths = []
-	for dir in XDG_DATA_DIRS:
-		type, subtype = name.split("/")
-		path = os.path.join(dir, "mime", type, subtype + ".xml")
-		if os.path.exists(path):
-			paths.append(path)
-
-	return paths
 
 
 class AliasesFile(object):
@@ -67,7 +41,7 @@ class AliasesFile(object):
 		return self._keys.get(name)
 
 ALIASES = AliasesFile()
-for f in getFiles("aliases"):
+for f in xdg.getFiles("aliases"):
 	ALIASES.parse(f)
 
 
@@ -131,7 +105,7 @@ class GlobsFile(object):
 		return mime
 
 GLOBS = GlobsFile()
-for f in getFiles("globs2"):
+for f in xdg.getFiles("globs2"):
 	GLOBS.parse(f)
 
 
@@ -159,7 +133,7 @@ class IconsFile(object):
 		return self._keys.get(name)
 
 ICONS = IconsFile()
-for f in getFiles("generic-icons"):
+for f in xdg.getFiles("generic-icons"):
 	ICONS.parse(f)
 
 
@@ -188,13 +162,13 @@ class SubclassesFile(object):
 		return self._keys.get(name, default)
 
 SUBCLASSES = SubclassesFile()
-for f in getFiles("subclasses"):
+for f in xdg.getFiles("subclasses"):
 	SUBCLASSES.parse(f)
 
 class MimeType(BaseMime):
 
 	@staticmethod
-	def installPackage(package, base=os.path.join(XDG_DATA_HOME, "mime")):
+	def installPackage(package, base=os.path.join(xdg.XDG_DATA_HOME, "mime")):
 		from shutil import copyfile
 		from subprocess import Popen
 		path = os.path.join(base, "packages")
@@ -221,7 +195,7 @@ class MimeType(BaseMime):
 
 	def aliases(self):
 		if not self._aliases:
-			files = getMimeFiles(self.name())
+			files = xdg.getMimeFiles(self.name())
 			if not files:
 				return
 
@@ -239,13 +213,13 @@ class MimeType(BaseMime):
 
 	def comment(self, lang="en"):
 		if lang not in self._comment:
-			files = getMimeFiles(self.name())
+			files = xdg.getMimeFiles(self.name())
 			if not files:
 				return
 
 			for file in files:
 				doc = minidom.parse(file)
-				for comment in doc.documentElement.getElementsByTagNameNS(FREEDESKTOP_NS, "comment"):
+				for comment in doc.documentElement.getElementsByTagNameNS(xdg.FREEDESKTOP_NS, "comment"):
 					nslang = comment.getAttributeNS(XML_NAMESPACE, "lang") or "en"
 					if nslang == lang:
 						self._comment[lang] = "".join(n.nodeValue for n in comment.childNodes).strip()
