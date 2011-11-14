@@ -19,9 +19,16 @@ class ActionsFile(object):
 		}
 
 	def _parseAssociations(self, key, cfg):
+		from .mime import MimeType
 		d = self._keys[key]
 
 		for mime, apps in cfg.items(key):
+			# First, check for aliases and unalias anything we find
+			# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
+			alias = MimeType(mime).aliasOf()
+			if alias:
+				mime = alias
+
 			if mime not in d:
 				d[mime] = []
 			assert apps.endswith(";")
