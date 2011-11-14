@@ -31,7 +31,6 @@ class ActionsFile(object):
 					# We either got two semicolons in a row
 					# or we got the last semicolon
 					continue
-				print mime, "->", app
 				d[mime].insert(0, app)
 
 	def __repr__(self):
@@ -51,4 +50,3 @@ class ActionsFile(object):
 ACTIONS = ActionsFile()
 for f in xdg.getFiles("applications/mimeapps.list"):
 	ACTIONS.parse(f)
-	print ACTIONS
