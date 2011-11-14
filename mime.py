@@ -41,7 +41,7 @@ class AliasesFile(object):
 		return self._keys.get(name)
 
 ALIASES = AliasesFile()
-for f in xdg.getFiles("aliases"):
+for f in xdg.getFiles("mime/aliases"):
 	ALIASES.parse(f)
 
 
@@ -105,7 +105,7 @@ class GlobsFile(object):
 		return mime
 
 GLOBS = GlobsFile()
-for f in xdg.getFiles("globs2"):
+for f in xdg.getFiles("mime/globs2"):
 	GLOBS.parse(f)
 
 
@@ -133,7 +133,7 @@ class IconsFile(object):
 		return self._keys.get(name)
 
 ICONS = IconsFile()
-for f in xdg.getFiles("generic-icons"):
+for f in xdg.getFiles("mime/generic-icons"):
 	ICONS.parse(f)
 
 
@@ -162,7 +162,7 @@ class SubclassesFile(object):
 		return self._keys.get(name, default)
 
 SUBCLASSES = SubclassesFile()
-for f in xdg.getFiles("subclasses"):
+for f in xdg.getFiles("mime/subclasses"):
 	SUBCLASSES.parse(f)
 
 class MimeType(BaseMime):

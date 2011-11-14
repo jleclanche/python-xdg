@@ -18,7 +18,7 @@ XDG_DATA_DIRS = set([XDG_DATA_HOME] + os.environ.get("XDG_DATA_DIRS", "/usr/loca
 def getFiles(name):
 	ret = []
 	for dir in XDG_DATA_DIRS:
-		path = os.path.join(dir, "mime", name)
+		path = os.path.join(dir, name)
 		if os.path.exists(path):
 			ret.append(path)
 	return ret
