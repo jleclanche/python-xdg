@@ -229,7 +229,7 @@ class MimeType(BaseMime):
 			return self._comment[lang]
 
 	def genericIcon(self):
-		return ICONS.get(self.name())
+		return ICONS.get(self.name()) or super(MimeType, self).genericIcon()
 
 	def subClassOf(self):
 		return [MimeType(mime) for mime in SUBCLASSES.get(self.name(), [])]
