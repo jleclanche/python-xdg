@@ -4,6 +4,7 @@ Shared definitions and helper functions for xdg
 """
 
 import os
+from ConfigParser import RawConfigParser
 
 FREEDESKTOP_NS = "http://www.freedesktop.org/standards/shared-mime-info"
 
@@ -32,3 +33,17 @@ def getMimeFiles(name):
 			paths.append(path)
 
 	return paths
+
+
+class IniFile(object):
+	def __init__(self):
+		self.keys = {}
+
+	def __repr__(self):
+		return self.keys.__repr__()
+
+	def parse(self, path):
+		with open(path, "r") as file:
+			self.cfg = RawConfigParser()
+			self.cfg.readfp(file)
+			self.parseKeys()
