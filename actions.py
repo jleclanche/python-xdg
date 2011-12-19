@@ -118,7 +118,7 @@ def bestApplication(mime):
 
 	# No application found
 
-def applicationsFor(mime):
+def associationsFor(mime):
 	ret = []
 	x = ACTIONS.defaultApplication(mime)
 	if x:
