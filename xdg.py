@@ -34,6 +34,14 @@ def getMimeFiles(name):
 
 	return paths
 
+def getDesktopFilePath(name):
+	ret = None
+	for path in getFiles(os.path.join("applications", name)):
+		if os.path.exists(path):
+			ret = path
+
+	return ret
+
 
 class IniFile(object):
 	def __init__(self):
