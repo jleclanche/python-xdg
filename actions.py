@@ -56,10 +56,10 @@ class ActionsFile(xdg.IniFile):
 				self.keys[DEFAULT_APPLICATIONS][mime] = app
 
 	def addedAssociations(self, mime):
-		return self.keys[ADDED_ASSOCIATIONS].get(mime)
+		return self.keys[ADDED_ASSOCIATIONS].get(mime, [])
 
 	def removedAssociations(self, mime):
-		return self.keys[REMOVED_ASSOCIATIONS].get(mime)
+		return self.keys[REMOVED_ASSOCIATIONS].get(mime, [])
 
 	def defaultApplication(self, mime):
 		return self.keys[DEFAULT_APPLICATIONS].get(mime)
@@ -89,6 +89,43 @@ class CacheFile(xdg.IniFile):
 					continue
 				self.keys[mime].insert(0, app)
 
+	def associationsFor(self, mime, exclude=[]):
+		return [app for app in self.keys[mime] if app not in exclude]
+
 CACHE = CacheFile()
 for f in xdg.getFiles("applications/mimeinfo.cache"):
 	CACHE.parse(f)
+
+
+def defaultApplication(mime):
+	return ACTIONS.defaultApplication(mime)
+
+def bestApplication(mime):
+	# First, check if the default app is defined
+	ret = ACTIONS.defaultApplication(mime)
+	if ret:
+		return ret
+
+	# Then, check the added associations (they have priority)
+	ret = ACTIONS.addedAssociations(mime)
+	if ret:
+		return ret[0]
+
+	# Finally, check the cached associations
+	ret = CACHE.associationsFor(mime, exclude=ACTIONS.removedAssociations(mime))
+	if ret:
+		return ret[0]
+
+	# No application found
+
+def applicationsFor(mime):
+	ret = []
+	x = ACTIONS.defaultApplication(mime)
+	if x:
+		return ret.append(x)
+
+	ret += ACTIONS.addedAssociations(mime)
+
+	ret += CACHE.associationsFor(mime, exclude=ACTIONS.removedAssociations(mime))
+
+	return ret
