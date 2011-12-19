@@ -233,3 +233,17 @@ class MimeType(BaseMime):
 
 	def subClassOf(self):
 		return [MimeType(mime) for mime in SUBCLASSES.get(self.name(), [])]
+
+	# MIME Actions
+
+	def associations(self):
+		from . import actions
+		return actions.associationsFor(self.name())
+
+	def bestApplication(self):
+		from . import actions
+		return actions.bestApplication(self.name())
+
+	def defaultApplication(self):
+		from . import actions
+		return actions.defaultApplication(self.name())
