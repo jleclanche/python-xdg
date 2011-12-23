@@ -194,7 +194,7 @@ class MimeType(BaseMime):
 
 	def aliases(self):
 		if not self._aliases:
-			files = xdg.getMimeFiles(self.name())
+			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
 			if not files:
 				return
 
@@ -212,7 +212,7 @@ class MimeType(BaseMime):
 
 	def comment(self, lang="en"):
 		if lang not in self._comment:
-			files = xdg.getMimeFiles(self.name())
+			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
 			if not files:
 				return
 

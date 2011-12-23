@@ -24,16 +24,6 @@ def getFiles(name):
 			ret.append(path)
 	return ret
 
-def getMimeFiles(name):
-	paths = []
-	for dir in XDG_DATA_DIRS:
-		type, subtype = name.split("/")
-		path = os.path.join(dir, "mime", type, subtype + ".xml")
-		if os.path.exists(path):
-			paths.append(path)
-
-	return paths
-
 def getDesktopFilePath(name):
 	ret = None
 	for path in getFiles(os.path.join("applications", name)):
