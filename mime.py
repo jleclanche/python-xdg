@@ -170,12 +170,11 @@ class MimeType(BaseMime):
 	@staticmethod
 	def installPackage(package, base=os.path.join(xdg.XDG_DATA_HOME, "mime")):
 		from shutil import copyfile
-		from subprocess import Popen
 		path = os.path.join(base, "packages")
 		if not os.path.exists(path):
 			os.makedirs(path)
 		copyfile(package, os.path.join(path, os.path.basename(package)))
-		Popen(["update-mime-database", base])
+		xdg.updateMimeDatabase()
 
 	@classmethod
 	def fromName(cls, name):

@@ -42,6 +42,9 @@ def getDesktopFilePath(name):
 
 	return ret
 
+def updateMimeDatabase():
+	from subprocess import Popen
+	Popen(["update-mime-database", base])
 
 class IniFile(object):
 	def __init__(self):
