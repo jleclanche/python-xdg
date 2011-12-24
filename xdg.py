@@ -32,11 +32,11 @@ def getDesktopFilePath(name):
 
 	return ret
 
-def updateDesktopDatabase():
+def updateDesktopDatabase(base):
 	from subprocess import Popen
 	Popen(["update-desktop-database", base])
 
-def updateMimeDatabase():
+def updateMimeDatabase(base):
 	from subprocess import Popen
 	Popen(["update-mime-database", base])
 

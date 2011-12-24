@@ -174,7 +174,7 @@ class MimeType(BaseMime):
 		if not os.path.exists(path):
 			os.makedirs(path)
 		copyfile(package, os.path.join(path, os.path.basename(package)))
-		xdg.updateMimeDatabase()
+		xdg.updateMimeDatabase(base)
 
 	@classmethod
 	def fromName(cls, name):
