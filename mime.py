@@ -11,6 +11,7 @@ shared mime database package.
 """
 
 import os
+import stat
 from fnmatch import fnmatch
 from xml.dom import minidom, XML_NAMESPACE
 from . import xdg
@@ -165,6 +166,9 @@ for f in xdg.getFiles("mime/subclasses"):
 	SUBCLASSES.parse(f)
 
 class MimeType(BaseMime):
+	"""
+	XDG-based MimeType
+	"""
 
 	@staticmethod
 	def installPackage(package, base=os.path.join(xdg.XDG_DATA_HOME, "mime")):
@@ -184,11 +188,30 @@ class MimeType(BaseMime):
 	@classmethod
 	def fromContent(cls, name):
 		try:
-			stat = os.stat(name)
+			stat_ = os.stat(name)
+			s = stat_.st_mode
 		except IOError:
 			return
 
-		if stat.st_size == 0:
+		if stat.S_ISBLK(s):
+			return cls("inode/blockdevice")
+
+		if stat.S_ISCHR(s):
+			return cls("inode/chardevice")
+
+		if stat.S_ISDIR(s):
+			return cls("inode/directory")
+
+		if stat.S_ISFIFO(s):
+			return cls("inode/fifo")
+
+		if stat.S_ISLNK(s):
+			return cls("inode/symlink")
+
+		if stat.S_ISSOCK(s):
+			return cls("inode/socket")
+
+		if s.st_size == 0:
 			return cls(cls.ZERO_SIZE)
 
 	def aliases(self):
