@@ -38,8 +38,8 @@ class AliasesFile(BaseFile):
 				mime, alias = line.split(" ")
 				self._keys[mime] = alias
 
-	def get(self, name):
-		return self._keys.get(name)
+	def get(self, name, default=None):
+		return self._keys.get(name, default)
 
 ALIASES = AliasesFile()
 for f in xdg.getFiles("mime/aliases"):
@@ -110,10 +110,9 @@ for f in xdg.getFiles("mime/globs2"):
 	GLOBS.parse(f)
 
 
-class IconsFile(BaseFile):
+class MagicFile(BaseFile):
 	"""
-	/usr/share/mime/icons
-	/usr/share/mime/generic-icons
+	/usr/share/mime/magic
 	"""
 	def parse(self, path):
 		with open(path, "r") as file:
@@ -121,15 +120,11 @@ class IconsFile(BaseFile):
 				if line.endswith("\n"):
 					line = line[:-1]
 
-				mime, icon = line.split(":")
-				self._keys[mime] = icon
+				pass
 
-	def get(self, name):
-		return self._keys.get(name)
-
-ICONS = IconsFile()
-for f in xdg.getFiles("mime/generic-icons"):
-	ICONS.parse(f)
+MAGIC = MagicFile()
+for f in xdg.getFiles("mime/magic"):
+	MAGIC.parse(f)
 
 
 class SubclassesFile(BaseFile):
@@ -146,9 +141,6 @@ class SubclassesFile(BaseFile):
 				if mime not in self._keys:
 					self._keys[mime] = []
 				self._keys[mime].append(subclass)
-
-	def get(self, name, default=None):
-		return self._keys.get(name, default)
 
 SUBCLASSES = SubclassesFile()
 for f in xdg.getFiles("mime/subclasses"):
