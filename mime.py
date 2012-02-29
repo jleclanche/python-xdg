@@ -25,6 +25,9 @@ class BaseFile(object):
 	def __repr__(self):
 		return self._keys.__repr__()
 
+	def get(self, name, default=None):
+		return self._keys.get(name, default)
+
 class AliasesFile(BaseFile):
 	"""
 	/usr/share/mime/aliases
@@ -37,9 +40,6 @@ class AliasesFile(BaseFile):
 
 				mime, alias = line.split(" ")
 				self._keys[mime] = alias
-
-	def get(self, name, default=None):
-		return self._keys.get(name, default)
 
 ALIASES = AliasesFile()
 for f in xdg.getFiles("mime/aliases"):
