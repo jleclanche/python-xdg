@@ -182,6 +182,10 @@ class MimeType(BaseMime):
 		except IOError:
 			return
 
+		# Test for mount point before testing for inode/directory
+		if os.path.ismount(name):
+			return cls("inode/mount-point")
+
 		if stat.S_ISBLK(s):
 			return cls("inode/blockdevice")
 
