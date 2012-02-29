@@ -18,16 +18,17 @@ from . import xdg
 from ..basemime import BaseMime
 
 
-class AliasesFile(object):
-	"""
-	/usr/share/mime/aliases
-	"""
+class BaseFile(object):
 	def __init__(self):
 		self._keys = {}
 
 	def __repr__(self):
 		return self._keys.__repr__()
 
+class AliasesFile(BaseFile):
+	"""
+	/usr/share/mime/aliases
+	"""
 	def parse(self, path):
 		with open(path, "r") as file:
 			for line in file:
@@ -109,17 +110,11 @@ for f in xdg.getFiles("mime/globs2"):
 	GLOBS.parse(f)
 
 
-class IconsFile(object):
+class IconsFile(BaseFile):
 	"""
 	/usr/share/mime/icons
 	/usr/share/mime/generic-icons
 	"""
-	def __init__(self):
-		self._keys = {}
-
-	def __repr__(self):
-		return self._keys.__repr__()
-
 	def parse(self, path):
 		with open(path, "r") as file:
 			for line in file:
@@ -137,16 +132,10 @@ for f in xdg.getFiles("mime/generic-icons"):
 	ICONS.parse(f)
 
 
-class SubclassesFile(object):
+class SubclassesFile(BaseFile):
 	"""
 	/usr/share/mime/subclasses
 	"""
-	def __init__(self):
-		self._keys = {}
-
-	def __repr__(self):
-		return self._keys.__repr__()
-
 	def parse(self, path):
 		with open(path, "r") as file:
 			for line in file:
