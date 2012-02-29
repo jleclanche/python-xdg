@@ -12,6 +12,7 @@ shared mime database package.
 
 import os
 import stat
+import struct
 from fnmatch import fnmatch
 from xml.dom import minidom, XML_NAMESPACE
 from . import xdg
@@ -110,9 +111,10 @@ for f in xdg.getFiles("mime/globs2"):
 	GLOBS.parse(f)
 
 
-class MagicFile(BaseFile):
+class IconsFile(BaseFile):
 	"""
-	/usr/share/mime/magic
+	/usr/share/mime/icons
+	/usr/share/mime/generic-icons
 	"""
 	def parse(self, path):
 		with open(path, "r") as file:
@@ -120,7 +122,141 @@ class MagicFile(BaseFile):
 				if line.endswith("\n"):
 					line = line[:-1]
 
-				pass
+				mime, icon = line.split(":")
+				self._keys[mime] = icon
+
+ICONS = IconsFile()
+for f in xdg.getFiles("mime/generic-icons"):
+	ICONS.parse(f)
+
+
+class MagicFile(BaseFile):
+	"""
+	/usr/share/mime/magic
+	"""
+	class Magic(object):
+		def __init__(self, *args):
+			pass
+
+	def readNumber(self, file):
+		ret = []
+		c = file.read(1)
+		while c:
+			if not c.isdigit():
+				file.seek(-1, os.SEEK_CUR)
+				break
+			ret.append(c)
+			c = file.read(1)
+
+		return ret and int("".join(ret)) or 0
+
+	def parse(self, path):
+		with open(path, "r") as file:
+			if not file.read(12) == "MIME-Magic\0\n":
+				raise ValueError("Bad header for file %r" % (path))
+
+			sections = []
+
+			while True:
+				# Parse the head
+				# Expect a "["
+				c = file.read(1)
+				if c != "[":
+					raise ValueError("Section syntax error in %r" % (file.name))
+				priority, mime = self.parseSectionHead(file)
+				if file.read(1) != "\n":
+					raise ValueError("Odd header in %r" % (file.name))
+
+				# Parse the section(s)
+				sections = []
+				while True:
+					c = file.read(1)
+					if not c:
+						return
+					file.seek(-1, os.SEEK_CUR)
+					if c != "[":
+						if c == "\n": # end of file
+							return
+						else:
+							sections.append(self.parseSectionBody(file))
+					else:
+						break
+
+				# Store it all
+				if mime not in self._keys:
+					self._keys[mime] = []
+				self._keys[mime].append((priority, sections))
+
+	def parseSectionHead(self, file):
+		"""
+		Parse head of a section
+		[50:text/x-diff]\n
+		"""
+		s = []
+		while True:
+			c = file.read(1)
+			if not c:
+				raise ValueError("Unfinished header in %r" % (file.name))
+			if c == "]":
+				break
+			s.append(c)
+		s = "".join(s)
+
+		if ":" not in s:
+			raise ValueError("No ':' in section header %r" % (s))
+
+		priority, type = s.split(":")
+		return priority, type
+
+	def parseSectionBody(self, file):
+		"""
+		Parse line of a section
+		[ indent ] ">" start-offset "=" value [ "&" mask ] [ "~" word-size ] [ "+" range-length ] "\n"
+		"""
+		indent = None
+		c = file.read(1)
+		if not c:
+			raise ValueError("Early EOF")
+
+		if c != ">":
+			file.seek(-1, os.SEEK_CUR)
+			indent = self.readNumber(file)
+			c = file.read(1)
+			if c != ">":
+				raise ValueError("Missing '>' in section body")
+
+		startOffset = self.readNumber(file)
+
+		c = file.read(1)
+
+		if c != "=":
+			raise ValueError("Missing '=' in %r section body (got %r)" % (file.name, c))
+
+		valueLength, = struct.unpack(">H", file.read(2))
+		value = file.read(valueLength)
+
+		invalidLine = False
+		c = file.read(1)
+		while True:
+			if c == "\n":
+				# Done with the section
+				break
+			elif c == "&":
+				match = file.read(valueLength)
+				break
+			elif c == "~":
+				wordSize = self.readNumber(file)
+				break
+			elif c == "+":
+				rangeLength = self.readNumber(file)
+				break
+			elif not c:
+				raise ValueError("Unexpected EOF")
+
+			# TODO unknown character, see kmimetyperepository.cpp
+
+		return self.Magic(indent, startOffset, valueLength, value)
+
 
 MAGIC = MagicFile()
 for f in xdg.getFiles("mime/magic"):
