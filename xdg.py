@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Shared definitions and helper functions for xdg
 """

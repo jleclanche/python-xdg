@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Implementation of the XDG Shared MIME Info spec version 0.20.
 http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-0.20.html
