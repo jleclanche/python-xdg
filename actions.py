@@ -89,7 +89,9 @@ class CacheFile(xdg.IniFile):
 				self.keys[mime].insert(0, app)
 
 	def associationsFor(self, mime, exclude=[]):
-		return [app for app in self.keys[mime] if app not in exclude]
+		if mime in self.keys:
+			return [app for app in self.keys[mime] if app not in exclude]
+		return []
 
 CACHE = CacheFile()
 for f in xdg.getFiles("applications/mimeinfo.cache"):
