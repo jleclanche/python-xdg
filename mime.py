@@ -11,7 +11,6 @@ shared mime database package.
 """
 
 import os
-import stat
 import struct
 from fnmatch import fnmatch
 from xml.dom import minidom, XML_NAMESPACE
@@ -305,34 +304,11 @@ class MimeType(BaseMime):
 	@classmethod
 	def fromContent(cls, name):
 		try:
-			stat_ = os.stat(name)
-			s = stat_.st_mode
+			size = os.stat(name).st_size
 		except IOError:
 			return
 
-		# Test for mount point before testing for inode/directory
-		if os.path.ismount(name):
-			return cls("inode/mount-point")
-
-		if stat.S_ISBLK(s):
-			return cls("inode/blockdevice")
-
-		if stat.S_ISCHR(s):
-			return cls("inode/chardevice")
-
-		if stat.S_ISDIR(s):
-			return cls("inode/directory")
-
-		if stat.S_ISFIFO(s):
-			return cls("inode/fifo")
-
-		if stat.S_ISLNK(s):
-			return cls("inode/symlink")
-
-		if stat.S_ISSOCK(s):
-			return cls("inode/socket")
-
-		if s.st_size == 0:
+		if size == 0:
 			return cls(cls.ZERO_SIZE)
 
 	def aliases(self):
