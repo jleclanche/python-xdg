@@ -117,6 +117,13 @@ def bestApplication(mime):
 	if ret:
 		return ret[0]
 
+	# If we still don't have anything, try the mime's parents one by one
+	from .mime import MimeType
+	for mime in MimeType(mime).subClassOf():
+		ret = bestApplication(mime.name())
+		if ret:
+			return ret
+
 	# No application found
 
 def associationsFor(mime):
