@@ -160,6 +160,11 @@ class MagicFile(BaseFile):
 				# Parse the head
 				# Expect a "["
 				c = file.read(1)
+
+				# Check if the file is empty
+				if not c:
+					return
+
 				if c != b"[":
 					raise ValueError("Section syntax error in %r: expected '[', got %r" % (file.name, c))
 				priority, mime = self.parseSectionHead(file)
