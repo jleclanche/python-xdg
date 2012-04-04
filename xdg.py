@@ -3,7 +3,10 @@ Shared definitions and helper functions for xdg
 """
 
 import os
-from ConfigParser import RawConfigParser
+try:
+	from configparser import RawConfigParser
+except ImportError:
+	from ConfigParser import RawConfigParser
 
 FREEDESKTOP_NS = "http://www.freedesktop.org/standards/shared-mime-info"
 

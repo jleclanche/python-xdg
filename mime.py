@@ -102,7 +102,7 @@ class GlobsFile(object):
 		if not matches:
 			return ""
 
-		weight, mime, glob = max(matches, key=lambda (weight, mime, glob): (weight, len(glob)))
+		weight, mime, glob = max(matches, key=lambda weight_mime_glob: (weight_mime_glob[0], len(weight_mime_glob[2])))
 		return mime
 
 GLOBS = GlobsFile()
