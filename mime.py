@@ -138,16 +138,16 @@ class MagicFile(BaseFile):
 			pass
 
 	def readNumber(self, file):
-		ret = []
+		ret = bytearray()
 		c = file.read(1)
 		while c:
 			if not c.isdigit():
 				file.seek(-1, os.SEEK_CUR)
 				break
-			ret.append(c)
+			ret.append(ord(c))
 			c = file.read(1)
 
-		return ret and int("".join(ret)) or 0
+		return ret and int(ret.decode("utf-8")) or 0
 
 	def parse(self, path):
 		with open(path, "rb") as file:
@@ -160,10 +160,10 @@ class MagicFile(BaseFile):
 				# Parse the head
 				# Expect a "["
 				c = file.read(1)
-				if c != "[":
+				if c != b"[":
 					raise ValueError("Section syntax error in %r: expected '[', got %r" % (file.name, c))
 				priority, mime = self.parseSectionHead(file)
-				if file.read(1) != "\n":
+				if file.read(1) != b"\n":
 					raise ValueError("Odd header in %r" % (file.name))
 
 				# Parse the section(s)
@@ -173,8 +173,8 @@ class MagicFile(BaseFile):
 					if not c:
 						return
 					file.seek(-1, os.SEEK_CUR)
-					if c != "[":
-						if c == "\n": # end of file
+					if c != b"[":
+						if c == b"\n": # end of file
 							return
 						else:
 							sections.append(self.parseSectionBody(file))
@@ -191,19 +191,19 @@ class MagicFile(BaseFile):
 		Parse head of a section
 		[50:text/x-diff]\n
 		"""
-		s = []
+		s = bytearray()
 		while True:
 			c = file.read(1)
 			if not c:
 				raise ValueError("Unfinished header in %r" % (file.name))
-			if c == "]":
+			if c == b"]":
 				break
-			s.append(c)
-		s = "".join(s)
+			s.append(ord(c))
 
-		if ":" not in s:
+		if b":" not in s:
 			raise ValueError("No ':' in section header %r" % (s))
 
+		s = s.decode("utf-8")
 		priority, type = s.split(":")
 		return priority, type
 
@@ -217,18 +217,18 @@ class MagicFile(BaseFile):
 		if not c:
 			raise ValueError("Early EOF")
 
-		if c != ">":
+		if c != b">":
 			file.seek(-1, os.SEEK_CUR)
 			indent = self.readNumber(file)
 			c = file.read(1)
-			if c != ">":
-				raise ValueError("Missing '>' in section body")
+			if c != b">":
+				raise ValueError("Missing '>' in section body (got %r)" % (c))
 
 		startOffset = self.readNumber(file)
 
 		c = file.read(1)
 
-		if c != "=":
+		if c != b"=":
 			raise ValueError("Missing '=' in %r section body (got %r)" % (file.name, c))
 
 		valueLength, = struct.unpack(">H", file.read(2))
@@ -237,20 +237,22 @@ class MagicFile(BaseFile):
 		invalidLine = False
 		c = file.read(1)
 		while True:
-			if c == "\n":
+			if c == b"\n":
 				# Done with the section
 				break
-			elif c == "&":
+			elif c == b"&":
 				match = file.read(valueLength)
 				break
-			elif c == "~":
+			elif c == b"~":
 				wordSize = self.readNumber(file)
 				break
-			elif c == "+":
+			elif c == b"+":
 				rangeLength = self.readNumber(file)
 				break
 			elif not c:
-				raise ValueError("Unexpected EOF")
+				raise ValueError("Unexpected EOF in section body")
+			else:
+				raise ValueError("Unexpected character in section body: %r" % (c))
 
 			# TODO unknown character, see kmimetyperepository.cpp
 
