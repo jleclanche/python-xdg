@@ -150,8 +150,8 @@ class MagicFile(BaseFile):
 		return ret and int("".join(ret)) or 0
 
 	def parse(self, path):
-		with open(path, "r") as file:
-			if not file.read(12) == "MIME-Magic\0\n":
+		with open(path, "rb") as file:
+			if not file.read(12) == b"MIME-Magic\0\n":
 				raise ValueError("Bad header for file %r" % (path))
 
 			sections = []
