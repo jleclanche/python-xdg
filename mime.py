@@ -20,6 +20,18 @@ from ..basemime import BaseMime
 
 FREEDESKTOP_NS = "http://www.freedesktop.org/standards/shared-mime-info"
 
+def installPackage(package, base=os.path.join(xdg.XDG_DATA_HOME, "mime")):
+	"""
+	Helper to install \a package to \a base and update the database
+	The base argument defaults to $XDG_DATA_HOME/mime
+	"""
+	from shutil import copyfile
+	path = os.path.join(base, "packages")
+	if not os.path.exists(path):
+		os.makedirs(path)
+	copyfile(package, os.path.join(path, os.path.basename(package)))
+	xdg.updateMimeDatabase(base)
+
 class BaseFile(object):
 	def __init__(self):
 		self._keys = {}
@@ -294,15 +306,6 @@ class MimeType(BaseMime):
 	"""
 	XDG-based MimeType
 	"""
-
-	@staticmethod
-	def installPackage(package, base=os.path.join(xdg.XDG_DATA_HOME, "mime")):
-		from shutil import copyfile
-		path = os.path.join(base, "packages")
-		if not os.path.exists(path):
-			os.makedirs(path)
-		copyfile(package, os.path.join(path, os.path.basename(package)))
-		xdg.updateMimeDatabase(base)
 
 	@classmethod
 	def fromName(cls, name):
