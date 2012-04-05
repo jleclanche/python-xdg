@@ -10,10 +10,6 @@ except ImportError:
 
 from .basedir import *
 
-FREEDESKTOP_NS = "http://www.freedesktop.org/standards/shared-mime-info"
-
-
-
 
 def getFiles(name):
 	ret = []

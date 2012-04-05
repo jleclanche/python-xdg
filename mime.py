@@ -18,6 +18,8 @@ from . import xdg
 from ..basemime import BaseMime
 
 
+FREEDESKTOP_NS = "http://www.freedesktop.org/standards/shared-mime-info"
+
 class BaseFile(object):
 	def __init__(self):
 		self._keys = {}
@@ -344,7 +346,7 @@ class MimeType(BaseMime):
 
 			for file in files:
 				doc = minidom.parse(file)
-				for comment in doc.documentElement.getElementsByTagNameNS(xdg.FREEDESKTOP_NS, "comment"):
+				for comment in doc.documentElement.getElementsByTagNameNS(FREEDESKTOP_NS, "comment"):
 					nslang = comment.getAttributeNS(XML_NAMESPACE, "lang") or "en"
 					if nslang == lang:
 						self._comment[lang] = "".join(n.nodeValue for n in comment.childNodes).strip()
