@@ -6,7 +6,7 @@ http://standards.freedesktop.org/autostart-spec/autostart-spec-latest.html
 import os
 from .basedir import XDG_CONFIG_HOME, XDG_CONFIG_DIRS
 
-AUTOSTART_DIRS = [os.path.join(x, "autostart") for path in XDG_CONFIG_DIRS]
+AUTOSTART_DIRS = [os.path.join(path, "autostart") for path in XDG_CONFIG_DIRS]
 
 def localAutostartPrograms():
 	return []
