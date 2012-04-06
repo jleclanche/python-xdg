@@ -123,6 +123,7 @@ class Trash(object):
 
 		self._writeInfo(name=name, path=path, deletionDate=strftime("%Y-%m-%dT%H:%M:%S"))
 		try:
+			# TODO spec says the move must be atomic (O_EXCL)
 			shutil.move(path, os.path.join(self.filesPath(), name))
 		except Exception:
 			self._cleanup(name)
