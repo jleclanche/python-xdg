@@ -20,7 +20,7 @@ class IniFile(object):
 		return self.keys.get(key, default)
 
 	def parse(self, path):
-		with open(path, "r") as file:
+		with open(path, "r", encoding="utf-8") as file:
 			self.cfg = RawConfigParser()
 			self.cfg.readfp(file)
 			self.parseKeys()
