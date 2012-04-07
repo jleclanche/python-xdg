@@ -5,6 +5,7 @@ http://www.freedesktop.org/wiki/Specifications/mime-actions-spec
 
 from . import xdg
 from .inifile import IniFile
+from .xdg import getDesktopFilePath
 
 ADDED_ASSOCIATIONS = "Added Associations"
 REMOVED_ASSOCIATIONS = "Removed Associations"
@@ -105,18 +106,20 @@ def defaultApplication(mime):
 def bestApplication(mime):
 	# First, check if the default app is defined
 	ret = ACTIONS.defaultApplication(mime)
-	if ret:
+	if ret and getDesktopFilePath(ret):
 		return ret
 
 	# Then, check the added associations (they have priority)
-	ret = ACTIONS.addedAssociations(mime)
-	if ret:
-		return ret[0]
+	associations = ACTIONS.addedAssociations(mime)
+	for assoc in associations:
+		if getDesktopFilePath(assoc):
+			return assoc
 
 	# Finally, check the cached associations
-	ret = CACHE.associationsFor(mime, exclude=ACTIONS.removedAssociations(mime))
-	if ret:
-		return ret[0]
+	associations = CACHE.associationsFor(mime, exclude=ACTIONS.removedAssociations(mime))
+	for assoc in associations:
+		if getDesktopFilePath(assoc):
+			return assoc
 
 	# If we still don't have anything, try the mime's parents one by one
 	from .mime import MimeType
