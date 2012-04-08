@@ -316,7 +316,7 @@ class BaseMimeType(object):
 		self._comment = {}
 
 	def __eq__(self, other):
-		if isinstance(other, BaseMime):
+		if isinstance(other, BaseMimeType):
 			return self.name() == other.name()
 		return self.name() == other
 
