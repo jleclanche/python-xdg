@@ -19,7 +19,7 @@ class ActionsFile(IniFile):
 
 	def __init__(self):
 		super(ActionsFile, self).__init__()
-		self.keys = {
+		self.sections = {
 			ADDED_ASSOCIATIONS: {},
 			REMOVED_ASSOCIATIONS: {},
 			DEFAULT_APPLICATIONS: {},
@@ -27,7 +27,7 @@ class ActionsFile(IniFile):
 
 	def _parseAssociations(self, key):
 		from .mime import MimeType
-		d = self.keys[key]
+		d = self.sections[key]
 
 		for mime, apps in self.cfg.items(key):
 			# Unalias every key
@@ -53,16 +53,16 @@ class ActionsFile(IniFile):
 		for mime, app in self.cfg.items(DEFAULT_APPLICATIONS):
 			# Check if the desktop file exists
 			if xdg.getDesktopFilePath(app):
-				self.keys[DEFAULT_APPLICATIONS][mime] = app
+				self.sections[DEFAULT_APPLICATIONS][mime] = app
 
 	def addedAssociations(self, mime):
-		return self.keys[ADDED_ASSOCIATIONS].get(mime, [])
+		return self.sections[ADDED_ASSOCIATIONS].get(mime, [])
 
 	def removedAssociations(self, mime):
-		return self.keys[REMOVED_ASSOCIATIONS].get(mime, [])
+		return self.sections[REMOVED_ASSOCIATIONS].get(mime, [])
 
 	def defaultApplication(self, mime):
-		return self.keys[DEFAULT_APPLICATIONS].get(mime)
+		return self.sections[DEFAULT_APPLICATIONS].get(mime)
 
 ACTIONS = ActionsFile()
 for f in xdg.getFiles("applications/mimeapps.list"):
@@ -81,8 +81,8 @@ class CacheFile(IniFile):
 			# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
 			mime = unalias(mime).name()
 
-			if mime not in self.keys:
-				self.keys[mime] = []
+			if mime not in self.sections:
+				self.sections[mime] = []
 
 			assert apps.endswith(";"), apps
 			apps = apps.split(";")
@@ -91,17 +91,16 @@ class CacheFile(IniFile):
 					# We either got two semicolons in a row
 					# or we got the last semicolon
 					continue
-				self.keys[mime].insert(0, app)
+				self.sections[mime].insert(0, app)
 
 	def associationsFor(self, mime, exclude=[]):
-		if mime in self.keys:
-			return [app for app in self.keys[mime] if app not in exclude]
+		if mime in self.sections:
+			return [app for app in self.sections[mime] if app not in exclude]
 		return []
 
 CACHE = CacheFile()
 for f in xdg.getFiles("applications/mimeinfo.cache"):
 	CACHE.parse(f)
-
 
 def defaultApplication(mime):
 	return ACTIONS.defaultApplication(mime)
