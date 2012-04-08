@@ -32,7 +32,7 @@ class ActionsFile(IniFile):
 		for mime, apps in self.cfg.items(key):
 			# Unalias every key
 			# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
-			mime = unalias(mime)
+			mime = unalias(mime).name()
 
 			if mime not in d:
 				d[mime] = []
@@ -79,7 +79,7 @@ class CacheFile(IniFile):
 		for mime, apps in self.cfg.items("MIME Cache"):
 			# Unalias every key
 			# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
-			mime = unalias(mime)
+			mime = unalias(mime).name()
 
 			if mime not in self.keys:
 				self.keys[mime] = []
