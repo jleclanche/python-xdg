@@ -31,6 +31,16 @@ def installPackage(package, base=os.path.join(xdg.XDG_DATA_HOME, "mime")):
 	copyfile(package, os.path.join(path, os.path.basename(package)))
 	xdg.updateMimeDatabase(base)
 
+def unalias(mime):
+	"""
+	If \a mime is an alias of another MimeType, return the target MimeType.
+	Otherwise, returns the MimeType passed unchanged.
+	"""
+	alias = mime.aliasOf()
+	if alias:
+		return alias
+	return mime
+
 class BaseFile(object):
 	def __init__(self):
 		self._keys = {}
