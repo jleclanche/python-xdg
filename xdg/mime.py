@@ -34,8 +34,10 @@ def installPackage(package, base=os.path.join(xdg.XDG_DATA_HOME, "mime")):
 def unalias(mime):
 	"""
 	If \a mime is an alias of another MimeType, return the target MimeType.
-	Otherwise, returns the MimeType passed unchanged.
+	Otherwise, returns the MimeType instance of the given mime.
 	"""
+	if not isinstance(mime, MimeType):
+		mime = MimeType(mime)
 	alias = mime.aliasOf()
 	if alias:
 		return alias
