@@ -421,14 +421,14 @@ class MimeType(BaseMimeType):
 		if not self._aliases:
 			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
 			if not files:
-				return
+				return []
 
 			for file in files:
 				doc = minidom.parse(file)
 				for node in doc.documentElement.getElementsByTagName("alias"):
 					alias = node.getAttribute("type")
 					if alias not in self._aliases:
-						self._aliases.append(alias)
+						self._aliases.append(MimeType(alias))
 
 		return self._aliases
 
