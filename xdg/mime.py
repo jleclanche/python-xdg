@@ -445,7 +445,9 @@ class MimeType(BaseMimeType):
 		return self._aliases
 
 	def aliasOf(self):
-		return MimeType(ALIASES.get(self.name()))
+		mime = ALIASES.get(self.name())
+		if mime:
+			return MimeType(mime)
 
 	def comment(self, lang="en"):
 		if lang not in self._comment:
