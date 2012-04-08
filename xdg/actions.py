@@ -77,6 +77,10 @@ class CacheFile(IniFile):
 
 	def parseKeys(self):
 		for mime, apps in self.cfg.items("MIME Cache"):
+			# Unalias every key
+			# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
+			mime = unalias(mime)
+
 			if mime not in self.keys:
 				self.keys[mime] = []
 
