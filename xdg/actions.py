@@ -56,13 +56,13 @@ class ActionsFile(IniFile):
 				self.sections[DEFAULT_APPLICATIONS][mime] = app
 
 	def addedAssociations(self, mime):
-		return self.sections[ADDED_ASSOCIATIONS].get(mime, [])
+		return self.get(ADDED_ASSOCIATIONS, mime, [])
 
 	def removedAssociations(self, mime):
-		return self.sections[REMOVED_ASSOCIATIONS].get(mime, [])
+		return self.get(REMOVED_ASSOCIATIONS, mime, [])
 
 	def defaultApplication(self, mime):
-		return self.sections[DEFAULT_APPLICATIONS].get(mime)
+		return self.get(DEFAULT_APPLICATIONS, mime)
 
 ACTIONS = ActionsFile()
 for f in xdg.getFiles("applications/mimeapps.list"):
