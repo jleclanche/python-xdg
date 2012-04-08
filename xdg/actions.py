@@ -107,26 +107,28 @@ def defaultApplication(mime):
 	return ACTIONS.defaultApplication(mime)
 
 def bestApplication(mime):
+	# Unalias the mime type if necessary
+	mime = unalias(mime)
+
 	# First, check if the default app is defined
-	ret = ACTIONS.defaultApplication(mime)
+	ret = ACTIONS.defaultApplication(mime.name())
 	if ret and getDesktopFilePath(ret):
 		return ret
 
 	# Then, check the added associations (they have priority)
-	associations = ACTIONS.addedAssociations(mime)
+	associations = ACTIONS.addedAssociations(mime.name())
 	for assoc in associations:
 		if getDesktopFilePath(assoc):
 			return assoc
 
 	# Finally, check the cached associations
-	associations = CACHE.associationsFor(mime, exclude=ACTIONS.removedAssociations(mime))
+	associations = CACHE.associationsFor(mime.name(), exclude=ACTIONS.removedAssociations(mime.name()))
 	for assoc in associations:
 		if getDesktopFilePath(assoc):
 			return assoc
 
 	# If we still don't have anything, try the mime's parents one by one
-	from .mime import MimeType
-	for mime in MimeType(mime).subClassOf():
+	for mime in mime.subClassOf():
 		ret = bestApplication(mime.name())
 		if ret:
 			return ret
