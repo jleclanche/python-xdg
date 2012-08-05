@@ -169,6 +169,13 @@ def bestAvailableApplications(mime):
 		if desktop:
 			yield desktop
 
+def bestAvailableApplication(mime):
+	"""
+	Same as bestApplication(), but checks if the .desktop files are
+	available on the file system.
+	"""
+	return next(bestAvailableApplications, None)
+
 def associationsFor(mime):
 	ret = []
 	x = ACTIONS.defaultApplication(mime)
