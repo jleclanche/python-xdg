@@ -114,7 +114,7 @@ def bestApplication(mime):
 	on the file system. This should be done separately, or you can use
 	the convenience function bestAvailableApplication()
 	"""
-	return next(bestApplications, None)
+	return next(bestApplications(mime), None)
 
 def bestApplications(mime):
 	"""
@@ -174,7 +174,7 @@ def bestAvailableApplication(mime):
 	Same as bestApplication(), but checks if the .desktop files are
 	available on the file system.
 	"""
-	return next(bestAvailableApplications, None)
+	return next(bestAvailableApplications(mime), None)
 
 def associationsFor(mime):
 	ret = []
