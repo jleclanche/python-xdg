@@ -39,4 +39,4 @@ def getDesktopFilePath(name):
 
 	for path in getFiles(os.path.join("applications", name)):
 		if os.path.exists(path):
-			return ret
+			return path
