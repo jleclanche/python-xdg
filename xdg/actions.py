@@ -164,8 +164,8 @@ def bestAvailableApplications(mime):
 	Same as bestApplications(), but checks if the .desktop files are
 	available on the file system.
 	"""
-	for desktop in bestApplications(mime):
-		desktop = getDesktopFilePath(mime)
+	for app in bestApplications(mime):
+		desktop = getDesktopFilePath(app)
 		if desktop:
 			yield desktop
 
