@@ -482,6 +482,18 @@ class MimeType(BaseMimeType):
 		from . import actions
 		return actions.bestApplication(self.name())
 
+	def bestApplications(self):
+		from . import actions
+		return actions.bestApplications(self.name())
+
+	def bestAvailableApplication(self):
+		from . import actions
+		return actions.bestAvailableApplication(self.name())
+
+	def bestAvailableApplications(self):
+		from . import actions
+		return actions.bestAvailableApplications(self.name())
+
 	def defaultApplication(self):
 		from . import actions
 		return actions.defaultApplication(self.name())
