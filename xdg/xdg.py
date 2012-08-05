@@ -14,14 +14,6 @@ def getFiles(name):
 			ret.append(path)
 	return ret
 
-def getDesktopFilePath(name):
-	ret = None
-	for path in getFiles(os.path.join("applications", name)):
-		if os.path.exists(path):
-			ret = path
-
-	return ret
-
 def updateDesktopDatabase(base):
 	from subprocess import Popen
 	Popen(["update-desktop-database", base])

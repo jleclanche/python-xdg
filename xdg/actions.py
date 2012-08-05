@@ -4,9 +4,9 @@ http://www.freedesktop.org/wiki/Specifications/mime-actions-spec
 """
 
 from . import xdg
+from .desktopfile import getDesktopFilePath
 from .inifile import IniFile
 from .mime import unalias
-from .xdg import getDesktopFilePath
 
 ADDED_ASSOCIATIONS = "Added Associations"
 REMOVED_ASSOCIATIONS = "Removed Associations"
