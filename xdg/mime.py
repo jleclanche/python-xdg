@@ -19,6 +19,17 @@ from . import xdg
 
 FREEDESKTOP_NS = "http://www.freedesktop.org/standards/shared-mime-info"
 
+TEXTCHARS = bytes("".join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100)))), "utf-8")
+
+def _isBinaryString(bytes):
+	"""
+	Determine if a string is classified as binary rather than text.
+	Same algorithm as used in file(1)
+	"""
+	nontext = bytes.translate(None, TEXTCHARS)
+	return bool(nontext)
+
+
 def installPackage(package, base=os.path.join(xdg.XDG_DATA_HOME, "mime")):
 	"""
 	Helper to install \a package to \a base and update the database
@@ -314,8 +325,6 @@ for f in xdg.getFiles("mime/subclasses"):
 	SUBCLASSES.parse(f)
 
 
-
-
 class BaseMimeType(object):
 	DEFAULT_TEXT = "text/plain"
 	DEFAULT_BINARY = "application/octet-stream"
@@ -407,7 +416,6 @@ class BaseMimeType(object):
 		return self.name().split("/")[0]
 
 
-
 class MimeType(BaseMimeType):
 	"""
 	XDG-based MimeType
@@ -428,6 +436,11 @@ class MimeType(BaseMimeType):
 
 		if size == 0:
 			return cls(cls.ZERO_SIZE)
+
+		if not _isBinaryString(open(name, "rb").read(1024)):
+			return cls(cls.DEFAULT_TEXT)
+
+		return cls(cls.DEFAULT_BINARY)
 
 	def aliases(self):
 		if not self._aliases:
