@@ -106,33 +106,68 @@ def defaultApplication(mime):
 	return ACTIONS.defaultApplication(mime)
 
 def bestApplication(mime):
+	"""
+	Convenience function that returns the first best-fitting application
+	to open a \a mime
+
+	NOTE: This function does NOT check for the presence of .desktop files
+	on the file system. This should be done separately, or you can use
+	the convenience function bestAvailableApplication()
+	"""
+	return next(bestApplications, None)
+
+def bestApplications(mime):
+	"""
+	Returns a generator of the applications able to open \a mime, from
+	most to least fitting choice.
+	 - MIME types are always unaliased first.
+	 - The default application is next
+	 - The user-added associations are next
+	 - The cached associations are next
+	 - If we still haven't found anything, the process is repeated for
+	   each of the MIME type's parents (recursively)
+
+	NOTE: This function does NOT check for the presence of .desktop files
+	on the file system. This should be done separately, or you can use
+	the convenience function bestAvailableApplications()
+	"""
 	# Unalias the mime type if necessary
 	mime = unalias(mime)
 
 	# First, check if the default app is defined
 	ret = ACTIONS.defaultApplication(mime.name())
 	if ret and getDesktopFilePath(ret):
-		return ret
+		yield ret
 
 	# Then, check the added associations (they have priority)
 	associations = ACTIONS.addedAssociations(mime.name())
 	for assoc in associations:
 		if getDesktopFilePath(assoc):
-			return assoc
+			yield assoc
 
 	# Finally, check the cached associations
 	associations = CACHE.associationsFor(mime.name(), exclude=ACTIONS.removedAssociations(mime.name()))
 	for assoc in associations:
 		if getDesktopFilePath(assoc):
-			return assoc
+			yield assoc
 
 	# If we still don't have anything, try the mime's parents one by one
 	for mime in mime.subClassOf():
 		ret = bestApplication(mime.name())
 		if ret:
-			return ret
+			yield ret
 
 	# No application found
+
+def bestAvailableApplications(mime):
+	"""
+	Same as bestApplications(), but checks if the .desktop files are
+	available on the file system.
+	"""
+	for desktop in bestApplications(mime):
+		desktop = getDesktopFilePath(app)
+		if desktop:
+			yield desktop
 
 def associationsFor(mime):
 	ret = []
