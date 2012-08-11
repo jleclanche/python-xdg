@@ -29,6 +29,20 @@ def _isBinaryString(bytes):
 	nontext = bytes.translate(None, TEXTCHARS)
 	return bool(nontext)
 
+def _readNumber(file):
+	"""
+	Read a number from a binary stream
+	"""
+	ret = bytearray()
+	c = file.read(1)
+	while c:
+		if not c.isdigit():
+			file.seek(-1, os.SEEK_CUR)
+			break
+		ret.append(ord(c))
+		c = file.read(1)
+
+	return int(ret or 0)
 
 def installPackage(package, base=os.path.join(xdg.XDG_DATA_HOME, "mime")):
 	"""
@@ -78,8 +92,8 @@ class AliasesFile(BaseFile):
 				self._keys[mime] = alias
 
 ALIASES = AliasesFile()
-for f in xdg.getFiles("mime/aliases"):
-	ALIASES.parse(f)
+for path in xdg.getFiles("mime/aliases"):
+	ALIASES.parse(path)
 
 
 class GlobsFile(object):
@@ -142,8 +156,8 @@ class GlobsFile(object):
 		return mime
 
 GLOBS = GlobsFile()
-for f in xdg.getFiles("mime/globs2"):
-	GLOBS.parse(f)
+for path in xdg.getFiles("mime/globs2"):
+	GLOBS.parse(path)
 
 
 class IconsFile(BaseFile):
@@ -161,148 +175,202 @@ class IconsFile(BaseFile):
 				self._keys[mime] = icon
 
 ICONS = IconsFile()
-for f in xdg.getFiles("mime/generic-icons"):
-	ICONS.parse(f)
+for path in xdg.getFiles("mime/generic-icons"):
+	ICONS.parse(path)
 
-
-class MagicFile(BaseFile):
-	"""
-	/usr/share/mime/magic
-	"""
-	class Magic(object):
-		def __init__(self, *args):
-			pass
-
-	def readNumber(self, file):
-		ret = bytearray()
-		c = file.read(1)
-		while c:
-			if not c.isdigit():
-				file.seek(-1, os.SEEK_CUR)
-				break
-			ret.append(ord(c))
-			c = file.read(1)
-
-		return ret and int(ret.decode("utf-8")) or 0
-
-	def parse(self, path):
-		with open(path, "rb") as file:
-			if not file.read(12) == b"MIME-Magic\0\n":
-				raise ValueError("Bad header for file %r" % (path))
-
-			sections = []
-
-			while True:
-				# Parse the head
-				# Expect a "["
-				c = file.read(1)
-
-				# Check if the file is empty
-				if not c:
-					return
-
-				if c != b"[":
-					raise ValueError("Section syntax error in %r: expected '[', got %r" % (file.name, c))
-				priority, mime = self.parseSectionHead(file)
-				if file.read(1) != b"\n":
-					raise ValueError("Odd header in %r" % (file.name))
-
-				# Parse the section(s)
-				sections = []
-				while True:
-					c = file.read(1)
-					if not c:
-						return
-					file.seek(-1, os.SEEK_CUR)
-					if c != b"[":
-						if c == b"\n": # end of file
-							return
-						else:
-							sections.append(self.parseSectionBody(file))
-					else:
-						break
-
-				# Store it all
-				if mime not in self._keys:
-					self._keys[mime] = []
-				self._keys[mime].append((priority, sections))
-
-	def parseSectionHead(self, file):
+class MagicRule(object):
+	def __init__(self, file):
 		"""
-		Parse head of a section
-		[50:text/x-diff]\n
-		"""
-		s = bytearray()
-		while True:
-			c = file.read(1)
-			if not c:
-				raise ValueError("Unfinished header in %r" % (file.name))
-			if c == b"]":
-				break
-			s.append(ord(c))
-
-		if b":" not in s:
-			raise ValueError("No ':' in section header %r" % (s))
-
-		s = s.decode("utf-8")
-		priority, type = s.split(":")
-		return priority, type
-
-	def parseSectionBody(self, file):
-		"""
-		Parse line of a section
+		Parse a section's line
 		[ indent ] ">" start-offset "=" value [ "&" mask ] [ "~" word-size ] [ "+" range-length ] "\n"
 		"""
-		indent = None
+		self.next = None
+		self.prev = None
+
+		self.nest = 0
 		c = file.read(1)
 		if not c:
 			raise ValueError("Early EOF")
 
 		if c != b">":
 			file.seek(-1, os.SEEK_CUR)
-			indent = self.readNumber(file)
+			self.nest = _readNumber(file)
 			c = file.read(1)
 			if c != b">":
 				raise ValueError("Missing '>' in section body (got %r)" % (c))
 
-		startOffset = self.readNumber(file)
+		self.startOffset = _readNumber(file)
 
 		c = file.read(1)
 
 		if c != b"=":
 			raise ValueError("Missing '=' in %r section body (got %r)" % (file.name, c))
 
-		valueLength, = struct.unpack(">H", file.read(2))
-		value = file.read(valueLength)
+		self.valueLength, = struct.unpack(">H", file.read(2))
+		self.value = file.read(self.valueLength)
 
-		invalidLine = False
 		c = file.read(1)
-		while True:
-			if c == b"\n":
-				# Done with the section
-				break
-			elif c == b"&":
-				match = file.read(valueLength)
-				break
-			elif c == b"~":
-				wordSize = self.readNumber(file)
-				break
-			elif c == b"+":
-				rangeLength = self.readNumber(file)
-				break
-			elif not c:
-				raise ValueError("Unexpected EOF in section body")
+
+		if c == b"&":
+			self.mask = file.read(self.valueLength)
+			c = file.read(1)
+		else:
+			self.mask = None
+
+		if c == b"~":
+			self.wordSize = _readNumber(file)
+			c = file.read(1)
+		else:
+			self.wordSize = 1
+
+		if c == b"+":
+			self.rangeLength = _readNumber(file)
+			c = file.read(1)
+		else:
+			self.rangeLength = 1
+
+		if c != b"\n":
+			raise ValueError("Malformed MIME magic line: %r" % (c))
+
+	def length(self):
+		return self.startOffset + self.valueLength + self.rangeLength
+
+	def appendRule(self, rule):
+		if self.nest < rule.nest:
+			self.next = rule
+			rule.prev = self
+
+		elif self.prev:
+			self.prev.appendRule(rule)
+
+	def match(self, buffer):
+		if self.match0(buffer):
+			if self.next:
+				return self.next.match(buffer)
+			return True
+
+	def match0(self, buffer):
+		l = len(buffer)
+		for o in range(self.rangeLength):
+			s = self.startOffset + o
+			e = self.valueLength + s
+			if l < e:
+				return False
+			if self.mask:
+				test = ""
+				for i in range(self.valueLength):
+					c = buffer[s+i] & self.mask[i]
+					test += chr(c)
 			else:
-				raise ValueError("Unexpected character in section body: %r" % (c))
+				test = buffer[s:e]
 
-			# TODO unknown character, see kmimetyperepository.cpp
+			if test == self.value:
+				return True
 
-		return self.Magic(indent, startOffset, valueLength, value)
+	def __repr__(self):
+		return "MagicRule(%r)" % (self.__str__())
+
+	def __str__(self):
+		return "%r>%r=[%r]%s&%s~%r+%r" % (self.nest, self.startOffset, self.valueLength, repr(self.value)[2:-1] or "", repr(self.mask)[2:-1], self.wordSize, self.rangeLength)
+
+
+class MagicFile(object):
+	"""
+	/usr/share/mime/magic
+	"""
+
+	class MagicType(object):
+		def __init__(self, mime):
+			self.mime = mime
+			self.topRules = []
+			self.lastRule = None
+
+		def getLine(self, file):
+			rule = MagicRule(file)
+
+			if rule.nest and self.lastRule:
+				self.lastRule.appendRule(rule)
+			else:
+				self.topRules.append(rule)
+				self.lastRule = rule
+
+			return rule
+
+		def match(self, buffer):
+			for rule in self.topRules:
+				if rule.match(buffer):
+					return self.mime
+
+		def __repr__(self):
+			return "MagicType(%r)" % (self.mime)
+
+	def __init__(self):
+		self.types = {} # Indexed by priority, each entry is a list of type rules
+		self.maxLength = 0
+
+	def __repr__(self):
+		return "MagicDB(<%i items>)" % (len(self.types))
+
+	def parse(self, fname):
+		with open(fname, "rb") as file:
+			if file.read(12) != b"MIME-Magic\0\n":
+				raise ValueError("Bad header for file %r" % (path))
+
+			while True:
+				# Parse the section head
+				# Example: "[50:text/x-diff]\n"
+				sectionHead = file.readline()
+				if not sectionHead:
+					break
+
+				if sectionHead[0] != ord(b"[") or sectionHead[-2:] != b"]\n":
+					raise ValueError("Malformed section heading: %r" % (sectionHead))
+
+				pri, tname = sectionHead[1:-2].split(b":")
+				pri = int(pri)
+				mime = str(tname, "utf-8")
+
+				if pri not in self.types:
+					self.types[pri] = []
+				ents = self.types[pri]
+
+				magictype = self.MagicType(mime)
+
+				c = file.read(1)
+				file.seek(-1, os.SEEK_CUR)
+				while c and c != b"[":
+					rule = magictype.getLine(file)
+					if rule and rule.length() > self.maxLength:
+						self.maxLength = rule.length()
+
+					c = file.read(1)
+					file.seek(-1, os.SEEK_CUR)
+
+				ents.append(magictype)
+
+				if not c:
+					break
+
+	def matchData(self, data, max=100, min=0):
+		for priority in sorted(self.types.keys(), key=lambda k: -k):
+			if priority > max:
+				continue
+			if priority < min:
+				break
+
+			for type in self.types[priority]:
+				mime = type.match(data)
+				if mime:
+					return mime
+
+	def match(self, path, max=100, min=0):
+		with open(path, "rb") as f:
+			return self.matchData(f.read(self.maxLength), max, min)
 
 
 MAGIC = MagicFile()
-for f in xdg.getFiles("mime/magic"):
-	MAGIC.parse(f)
+for path in xdg.getFiles("mime/magic"):
+	MAGIC.parse(path)
 
 
 class SubclassesFile(BaseFile):
@@ -321,8 +389,8 @@ class SubclassesFile(BaseFile):
 				self._keys[mime].append(subclass)
 
 SUBCLASSES = SubclassesFile()
-for f in xdg.getFiles("mime/subclasses"):
-	SUBCLASSES.parse(f)
+for path in xdg.getFiles("mime/subclasses"):
+	SUBCLASSES.parse(path)
 
 
 class BaseMimeType(object):
