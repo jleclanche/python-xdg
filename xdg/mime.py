@@ -505,6 +505,10 @@ class MimeType(BaseMimeType):
 		if size == 0:
 			return cls(cls.ZERO_SIZE)
 
+		match = MAGIC.match(name)
+		if match:
+			return cls(match)
+
 		if not _isBinaryString(open(name, "rb").read(1024)):
 			return cls(cls.DEFAULT_TEXT)
 
