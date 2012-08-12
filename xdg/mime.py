@@ -399,6 +399,14 @@ class BaseMimeType(object):
 	SCHEME_FORMAT = "x-scheme-handler/%s"
 	ZERO_SIZE = "application/x-zerosize"
 
+	INODE_MOUNTPOINT = "inode/mount-point"
+	INODE_BLOCKDEVICE = "inode/blockdevice"
+	INODE_CHARDEVICE = "inode/chardevice"
+	INODE_DIRECTORY = "inode/directory"
+	INODE_FIFO = "inode/fifo"
+	INODE_SYMLINK = "inode/symlink"
+	INODE_SOCKET = "inode/socket"
+
 	def __init__(self, mime):
 		self._name = mime
 		self._aliases = []
@@ -425,25 +433,25 @@ class BaseMimeType(object):
 
 		# Test for mount point before testing for inode/directory
 		if os.path.ismount(name):
-			return cls("inode/mount-point")
+			return cls(cls.INODE_MOUNTPOINT)
 
 		if stat.S_ISBLK(mode):
-			return cls("inode/blockdevice")
+			return cls(cls.INODE_BLOCKDEVICE)
 
 		if stat.S_ISCHR(mode):
-			return cls("inode/chardevice")
+			return cls(cls.INODE_CHARDEVICE)
 
 		if stat.S_ISDIR(mode):
-			return cls("inode/directory")
+			return cls(cls.INODE_DIRECTORY)
 
 		if stat.S_ISFIFO(mode):
-			return cls("inode/fifo")
+			return cls(cls.INODE_FIFO)
 
 		if stat.S_ISLNK(mode):
-			return cls("inode/symlink")
+			return cls(cls.INODE_SYMLINK)
 
 		if stat.S_ISSOCK(mode):
-			return cls("inode/socket")
+			return cls(cls.INODE_SOCKET)
 
 	@classmethod
 	def fromScheme(cls, uri):
