@@ -505,6 +505,10 @@ class MimeType(BaseMimeType):
 
 	@classmethod
 	def fromContent(cls, name):
+		inode = cls.fromInode(name)
+		if inode and inode != cls.INODE_SYMLINK:
+			return cls(inode)
+
 		try:
 			size = os.stat(name).st_size
 		except IOError:
