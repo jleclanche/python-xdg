@@ -52,7 +52,7 @@ class ActionsFile(IniFile):
 		# Default apps are not lists
 		for mime, app in self.cfg.items(DEFAULT_APPLICATIONS):
 			# Check if the desktop file exists
-			if xdg.getDesktopFilePath(app):
+			if getDesktopFilePath(app):
 				self.sections[DEFAULT_APPLICATIONS][mime] = app
 
 	def addedAssociations(self, mime):
