@@ -69,10 +69,14 @@ False
 >>> MimeType.fromScheme("file:///").name()
 'x-scheme-handler/file'
 >>> f = open("test.tmp", "w")
->>> f.close()
 >>> MimeType.fromContent(f.name).name()
 'application/x-zerosize'
+>>> _ = f.write("foo")
+>>> f.close()
+>>> MimeType.fromContent(f.name).name()
+'text/plain'
 >>> os.remove(f.name)
+
 """
 
 if __name__ == "__main__":
