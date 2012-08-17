@@ -37,6 +37,6 @@ def getDesktopFilePath(name):
 	"""
 	from .xdg import getFiles
 
-	for path in getFiles(os.path.join("applications", name)):
-		if os.path.exists(path):
-			return path
+	files = getFiles(os.path.join("applications", name))
+	if files:
+		return files[0]
