@@ -40,3 +40,10 @@ def getDesktopFilePath(name):
 	files = getFiles(os.path.join("applications", name))
 	if files:
 		return files[0]
+
+	# http://standards.freedesktop.org/menu-spec/menu-spec-1.0.html#merge-algorithm
+	# Desktop files have their directories stripped in the process and replaced by
+	# a dash. We still prioritize the direct paths, but now check for the dirs.
+	files = getFiles(os.path.join("applications", name.replace("-", "/")))
+	if files:
+		return files[0]
