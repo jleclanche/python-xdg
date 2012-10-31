@@ -33,6 +33,10 @@ Tests for python-mime
 'inode/mount-point'
 >>> MimeType.fromInode(".").name()
 'inode/directory'
+>>> MimeType(MimeType("inode/directory")).name()
+'inode/directory'
+>>> MimeType("inode/directory").name() is MimeType(MimeType("inode/directory")).name()
+True
 >>> MimeType("text/x-lua").comment()
 'Lua script'
 >>> MimeType("application/x-does-not-exist")
