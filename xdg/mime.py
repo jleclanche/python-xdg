@@ -408,7 +408,7 @@ class BaseMimeType(object):
 	INODE_SOCKET = "inode/socket"
 
 	def __init__(self, mime):
-		self._name = mime
+		self._name = str(mime)
 		self._aliases = []
 		self._comment = {}
 
