@@ -542,6 +542,9 @@ class MimeType(BaseMimeType):
 		return cls(cls.DEFAULT_BINARY)
 
 	def _localizedTag(self, tag, lang):
+		"""
+		Gets the value of a tag that can be localized through xml:lang
+		"""
 		cache = self._localized[tag]
 		if lang not in cache:
 			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
