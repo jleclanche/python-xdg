@@ -35,6 +35,8 @@ Tests for python-mime
 'inode/directory'
 >>> MimeType(MimeType("inode/directory")).name()
 'inode/directory'
+>>> MimeType("application/x-bzip").extensions()
+['.bz2', '.bz']
 >>> MimeType("inode/directory").name() is MimeType(MimeType("inode/directory")).name()
 True
 >>> MimeType("text/x-lua").comment()

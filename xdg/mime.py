@@ -102,8 +102,12 @@ class GlobsFile(object):
 	"""
 	def __init__(self):
 		self._extensions = {}
+		self._extensionsFor = {}
 		self._literals = {}
 		self._matches = []
+
+	def extensionsFor(self, mime):
+		return self._extensionsFor[str(mime)]
 
 	def parse(self, path):
 		with open(path, "r") as file:
@@ -127,6 +131,13 @@ class GlobsFile(object):
 					extension = glob[1:]
 					if "*" not in extension and "?" not in extension and "[" not in extension:
 						self._extensions[extension] = mime
+						# Add the mime type to the extensionsFor dict
+						# It has to keep the order intact, as we want eg. file save dialogs to
+						# be able to rely on getting the "best extension" (always the first one)
+						# ref: https://bugs.freedesktop.org/show_bug.cgi?id=47950
+						if mime not in self._extensionsFor:
+							self._extensionsFor[str(mime)] = []
+						self._extensionsFor[str(mime)].append(extension)
 
 				else:
 					self._matches.append((int(weight), mime, glob, flags))
@@ -562,6 +573,9 @@ class MimeType(BaseMimeType):
 
 		if lang in self._comment:
 			return self._comment[lang]
+
+	def extensions(self):
+		return GLOBS.extensionsFor(self)
 
 	def genericIcon(self):
 		return ICONS.get(self.name()) or super(MimeType, self).genericIcon()
