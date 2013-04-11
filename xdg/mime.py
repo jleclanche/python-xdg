@@ -421,7 +421,11 @@ class BaseMimeType(object):
 	def __init__(self, mime):
 		self._name = str(mime)
 		self._aliases = []
-		self._comment = {}
+		self._localized = {
+			"acronym": {},
+			"comment": {},
+			"expanded-acronym": {},
+		}
 
 	def __eq__(self, other):
 		if isinstance(other, BaseMimeType):
@@ -537,6 +541,26 @@ class MimeType(BaseMimeType):
 
 		return cls(cls.DEFAULT_BINARY)
 
+	def _localizedTag(self, tag, lang):
+		cache = self._localized[tag]
+		if lang not in cache:
+			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
+			if not files:
+				return
+
+			for file in files:
+				doc = minidom.parse(file)
+				for element in doc.documentElement.getElementsByTagNameNS(FREEDESKTOP_NS, tag):
+					nslang = element.getAttributeNS(XML_NAMESPACE, "lang") or "en"
+					if nslang == lang:
+						cache[lang] = "".join(n.nodeValue for n in element.childNodes).strip()
+						break
+
+		return cache.get(lang)
+
+	def acronym(self, lang="en"):
+		return self._localizedTag("acronym", lang)
+
 	def aliases(self):
 		if not self._aliases:
 			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
@@ -558,21 +582,10 @@ class MimeType(BaseMimeType):
 			return MimeType(mime)
 
 	def comment(self, lang="en"):
-		if lang not in self._comment:
-			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
-			if not files:
-				return
+		return self._localizedTag("comment", lang)
 
-			for file in files:
-				doc = minidom.parse(file)
-				for comment in doc.documentElement.getElementsByTagNameNS(FREEDESKTOP_NS, "comment"):
-					nslang = comment.getAttributeNS(XML_NAMESPACE, "lang") or "en"
-					if nslang == lang:
-						self._comment[lang] = "".join(n.nodeValue for n in comment.childNodes).strip()
-						break
-
-		if lang in self._comment:
-			return self._comment[lang]
+	def expandedAcronym(self, lang="en"):
+		return self._localizedTag("expanded-acronym", lang)
 
 	def extensions(self):
 		return GLOBS.extensionsFor(self)
