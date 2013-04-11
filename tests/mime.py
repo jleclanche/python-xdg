@@ -7,10 +7,6 @@ Tests for python-mime
 >>> mime = MimeType.fromName("foo.txt")
 >>> mime.name()
 'text/plain'
->>> mime.comment()
-'plain text document'
->>> mime.comment(lang="fr")
-'document texte brut'
 >>> mime.type()
 'text'
 >>> mime.subtype()
@@ -19,6 +15,53 @@ Tests for python-mime
 <MimeType: text/x-generic>
 >>> mime.genericMime().name()
 'text/x-generic'
+
+# Localized attributes
+>>> mime.comment()
+'plain text document'
+>>> mime.comment(lang="en") == mime.comment()
+True
+>>> mime.comment(lang="fr")
+'document texte brut'
+>>> MimeType("application/xml").comment()
+'XML document'
+>>> MimeType("application/xml").acronym()
+'XML'
+>>> MimeType("application/xml").expandedAcronym()
+'eXtensible Markup Language'
+
+# Non-existant mime types
+>>> MimeType("application/x-does-not-exist")
+<MimeType: application/x-does-not-exist>
+>>> MimeType("application/x-does-not-exist").comment()
+
+# Aliases / subclasses
+>>> MimeType("application/javascript").aliases()
+[<MimeType: application/x-javascript>, <MimeType: text/javascript>]
+>>> MimeType("text/xml").aliasOf()
+<MimeType: application/xml>
+>>> MimeType("text/x-python").subClassOf()
+[<MimeType: application/x-executable>, <MimeType: text/plain>]
+>>> MimeType("text/x-python").isInstance("text/x-python")
+True
+>>> MimeType("text/x-python").isInstance("text/plain")
+True
+>>> MimeType("text/x-python").isInstance("application/x-executable")
+True
+>>> MimeType("text/plain").isInstance("application/zip")
+False
+
+# icons / extensions
+>>> MimeType("application/zip").genericIcon()
+'package-x-generic'
+>>> MimeType("application/zip").icon()
+'application-zip'
+>>> MimeType("text/plain").genericIcon()
+'text-x-generic'
+>>> MimeType("application/x-bzip").extensions()
+['.bz2', '.bz']
+
+# from* classmethods
 >>> MimeType.fromName("foo.TXT").name()
 'text/plain'
 >>> MimeType.fromName("foo.C").name()
@@ -35,37 +78,8 @@ Tests for python-mime
 'inode/directory'
 >>> MimeType(MimeType("inode/directory")).name()
 'inode/directory'
->>> MimeType("application/x-bzip").extensions()
-['.bz2', '.bz']
 >>> MimeType("inode/directory").name() is MimeType(MimeType("inode/directory")).name()
 True
->>> MimeType("text/x-lua").comment()
-'Lua script'
->>> MimeType("application/x-does-not-exist")
-<MimeType: application/x-does-not-exist>
->>> MimeType("application/x-does-not-exist").comment()
->>> MimeType.fromName("foo.mkv").name()
-'video/x-matroska'
->>> MimeType("application/javascript").aliases()
-[<MimeType: application/x-javascript>, <MimeType: text/javascript>]
->>> MimeType("text/xml").aliasOf()
-<MimeType: application/xml>
->>> MimeType("text/x-python").subClassOf()
-[<MimeType: application/x-executable>, <MimeType: text/plain>]
->>> MimeType("application/zip").genericIcon()
-'package-x-generic'
->>> MimeType("application/zip").icon()
-'application-zip'
->>> MimeType("text/plain").genericIcon()
-'text-x-generic'
->>> MimeType("text/x-python").isInstance("text/x-python")
-True
->>> MimeType("text/x-python").isInstance("text/plain")
-True
->>> MimeType("text/x-python").isInstance("application/x-executable")
-True
->>> MimeType("text/plain").isInstance("application/zip")
-False
 >>> MimeType.fromScheme("http://example.com").name()
 'x-scheme-handler/http'
 >>> MimeType.fromScheme("ftp://example.com").name()
