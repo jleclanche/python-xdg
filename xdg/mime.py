@@ -102,8 +102,12 @@ class GlobsFile(object):
 	"""
 	def __init__(self):
 		self._extensions = {}
+		self._extensionsFor = {}
 		self._literals = {}
 		self._matches = []
+
+	def extensionsFor(self, mime):
+		return self._extensionsFor[str(mime)]
 
 	def parse(self, path):
 		with open(path, "r") as file:
@@ -127,6 +131,13 @@ class GlobsFile(object):
 					extension = glob[1:]
 					if "*" not in extension and "?" not in extension and "[" not in extension:
 						self._extensions[extension] = mime
+						# Add the mime type to the extensionsFor dict
+						# It has to keep the order intact, as we want eg. file save dialogs to
+						# be able to rely on getting the "best extension" (always the first one)
+						# ref: https://bugs.freedesktop.org/show_bug.cgi?id=47950
+						if mime not in self._extensionsFor:
+							self._extensionsFor[str(mime)] = []
+						self._extensionsFor[str(mime)].append(extension)
 
 				else:
 					self._matches.append((int(weight), mime, glob, flags))
@@ -414,7 +425,11 @@ class BaseMimeType(object):
 		else:
 			self._name = mime
 		self._aliases = []
-		self._comment = {}
+		self._localized = {
+			"acronym": {},
+			"comment": {},
+			"expanded-acronym": {},
+		}
 
 	def __eq__(self, other):
 		if isinstance(other, BaseMimeType):
@@ -530,6 +545,29 @@ class MimeType(BaseMimeType):
 
 		return cls(cls.DEFAULT_BINARY)
 
+	def _localizedTag(self, tag, lang):
+		"""
+		Gets the value of a tag that can be localized through xml:lang
+		"""
+		cache = self._localized[tag]
+		if lang not in cache:
+			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
+			if not files:
+				return
+
+			for file in files:
+				doc = minidom.parse(file)
+				for element in doc.documentElement.getElementsByTagNameNS(FREEDESKTOP_NS, tag):
+					nslang = element.getAttributeNS(XML_NAMESPACE, "lang") or "en"
+					if nslang == lang:
+						cache[lang] = "".join(n.nodeValue for n in element.childNodes).strip()
+						break
+
+		return cache.get(lang)
+
+	def acronym(self, lang="en"):
+		return self._localizedTag("acronym", lang)
+
 	def aliases(self):
 		if not self._aliases:
 			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
@@ -551,21 +589,13 @@ class MimeType(BaseMimeType):
 			return MimeType(mime)
 
 	def comment(self, lang="en"):
-		if lang not in self._comment:
-			files = xdg.getFiles(os.path.join("mime", self.type(), "%s.xml" % (self.subtype())))
-			if not files:
-				return
+		return self._localizedTag("comment", lang)
 
-			for file in files:
-				doc = minidom.parse(file)
-				for comment in doc.documentElement.getElementsByTagNameNS(FREEDESKTOP_NS, "comment"):
-					nslang = comment.getAttributeNS(XML_NAMESPACE, "lang") or "en"
-					if nslang == lang:
-						self._comment[lang] = "".join(n.nodeValue for n in comment.childNodes).strip()
-						break
+	def expandedAcronym(self, lang="en"):
+		return self._localizedTag("expanded-acronym", lang)
 
-		if lang in self._comment:
-			return self._comment[lang]
+	def extensions(self):
+		return GLOBS.extensionsFor(self)
 
 	def genericIcon(self):
 		return ICONS.get(self.name()) or super(MimeType, self).genericIcon()

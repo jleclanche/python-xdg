@@ -7,10 +7,6 @@ Tests for python-mime
 >>> mime = MimeType.fromName("foo.txt")
 >>> mime.name()
 'text/plain'
->>> mime.comment()
-'plain text document'
->>> mime.comment(lang="fr")
-'document texte brut'
 >>> mime.type()
 'text'
 >>> mime.subtype()
@@ -42,27 +38,33 @@ Tests for python-mime
 'inode/directory'
 >>> MimeType(MimeType("inode/directory")).name()
 'inode/directory'
->>> MimeType("inode/directory").name() is MimeType(MimeType("inode/directory")).name()
+
+# Localized attributes
+>>> mime.comment()
+'plain text document'
+>>> mime.comment(lang="en") == mime.comment()
 True
->>> MimeType("text/x-lua").comment()
-'Lua script'
+>>> mime.comment(lang="fr")
+'document texte brut'
+>>> MimeType("application/xml").comment()
+'XML document'
+>>> MimeType("application/xml").acronym()
+'XML'
+>>> MimeType("application/xml").expandedAcronym()
+'eXtensible Markup Language'
+
+# Non-existant mime types
 >>> MimeType("application/x-does-not-exist")
 <MimeType: application/x-does-not-exist>
 >>> MimeType("application/x-does-not-exist").comment()
->>> MimeType.fromName("foo.mkv").name()
-'video/x-matroska'
+
+# Aliases / subclasses
 >>> MimeType("application/javascript").aliases()
 [<MimeType: application/x-javascript>, <MimeType: text/javascript>]
 >>> MimeType("text/xml").aliasOf()
 <MimeType: application/xml>
 >>> MimeType("text/x-python").subClassOf()
 [<MimeType: application/x-executable>, <MimeType: text/plain>]
->>> MimeType("application/zip").genericIcon()
-'package-x-generic'
->>> MimeType("application/zip").icon()
-'application-zip'
->>> MimeType("text/plain").genericIcon()
-'text-x-generic'
 >>> MimeType("text/x-python").isInstance("text/x-python")
 True
 >>> MimeType("text/x-python").isInstance("text/plain")
@@ -71,6 +73,32 @@ True
 True
 >>> MimeType("text/plain").isInstance("application/zip")
 False
+
+# icons / extensions
+>>> MimeType("application/zip").genericIcon()
+'package-x-generic'
+>>> MimeType("application/zip").icon()
+'application-zip'
+>>> MimeType("text/plain").genericIcon()
+'text-x-generic'
+>>> MimeType("application/x-bzip").extensions()
+['.bz', '.bz2']
+
+# from* classmethods
+>>> MimeType.fromName("foo.TXT").name()
+'text/plain'
+>>> MimeType.fromName("foo.C").name()
+'text/x-c++src'
+>>> MimeType.fromName("foo.c").name()
+'text/x-csrc'
+>>> MimeType.fromInode("/dev/sda").name()
+'inode/blockdevice'
+>>> MimeType.fromInode("/dev/null").name()
+'inode/chardevice'
+>>> MimeType.fromInode("/").name()
+'inode/mount-point'
+>>> MimeType.fromInode(".").name()
+'inode/directory'
 >>> MimeType.fromScheme("http://example.com").name()
 'x-scheme-handler/http'
 >>> MimeType.fromScheme("ftp://example.com").name()
