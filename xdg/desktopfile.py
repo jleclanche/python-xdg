@@ -6,6 +6,11 @@ import os
 from xdg.inifile import IniFile
 
 
+def urlify(arg):
+	# stub
+	return arg
+
+
 class DesktopFile(IniFile):
 	def parseKeys(self):
 		d = self.sections["Desktop Entry"] = {}
@@ -27,6 +32,18 @@ class DesktopFile(IniFile):
 
 	def executable(self):
 		return self.value("Exec")
+
+	def formattedExec(self, *args):
+		_exec = self.executable().split()
+
+		for i, arg in enumerate(_exec):
+			arg = arg.replace("%f", args[0])
+			arg = arg.replace("%F", " ".join(args))
+			arg = arg.replace("%f", urlify(args[0]))
+			arg = arg.replace("%U", " ".join(urlify(x) for x in args))
+			_exec[i] = arg
+
+		return _exec
 
 	def name(self):
 		return self.translatedValue("Name")
