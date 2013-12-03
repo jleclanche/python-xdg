@@ -4,9 +4,9 @@ Base for .desktop file format
 """
 
 try:
-	from configparser import RawConfigParser
+	from configparser import RawConfigParser, NoSectionError
 except ImportError:
-	from ConfigParser import RawConfigParser
+	from ConfigParser import RawConfigParser, NoSectionError
 
 
 class IniFile(object):

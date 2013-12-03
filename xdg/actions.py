@@ -5,7 +5,7 @@ http://www.freedesktop.org/wiki/Specifications/mime-actions-spec
 
 from . import xdg
 from .desktopfile import getDesktopFilePath
-from .inifile import IniFile
+from .inifile import IniFile, NoSectionError
 from .mime import unalias
 
 ADDED_ASSOCIATIONS = "Added Associations"
@@ -28,8 +28,12 @@ class ActionsFile(IniFile):
 	def _parseAssociations(self, key):
 		from .mime import MimeType
 		d = self.sections[key]
+		try:
+			items = self.cfg.items(key)
+		except NoSectionError:
+			items = []
 
-		for mime, apps in self.cfg.items(key):
+		for mime, apps in items:
 			# Unalias every key
 			# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
 			mime = unalias(mime).name()
