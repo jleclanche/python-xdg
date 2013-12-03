@@ -17,6 +17,15 @@ XDG_DATA_DIRS and XDG_CONFIG_DIRS:
 XDG_RUNTIME_DIR:
  Provides its respective environment variable. Does not have a default, applications should find their own fallback.
 
+
+Accompanied by XDG User Directories Specification
+http://www.freedesktop.org/wiki/Software/xdg-user-dirs/
+
+XDG_DOWNLOAD_DIR:
+ Default directory where downloads should go. Defaults to $HOME.
+
+XDG_DESKTOP_DIR:
+ The user's Desktop directory. Defaults to $HOME/Desktop
 """
 
 import os
@@ -51,3 +60,7 @@ XDG_CACHE_HOME  = os.environ.get("XDG_CACHE_HOME", os.path.join(HOME, ".cache"))
 
 # Single directory where user-specific runtime files and other file objects should be placed.
 XDG_RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR")
+
+# xdg-user-dirs
+XDG_DESKTOP_DIR = os.environ.get("XDG_DOWNLOAD_DIR", os.path.join(HOME, "Desktop"))
+XDG_DOWNLOAD_DIR = os.environ.get("XDG_DOWNLOAD_DIR", HOME)
