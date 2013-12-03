@@ -19,6 +19,13 @@ Tests for python-mime
 <MimeType: text/x-generic>
 >>> mime.genericMime().name()
 'text/x-generic'
+>>> mime = MimeType("text/plain; charset=UTF-8")
+>>> mime.name()
+'text/plain'
+>>> mime.type()
+'text'
+>>> mime.subtype()
+'plain'
 >>> MimeType.fromName("foo.TXT").name()
 'text/plain'
 >>> MimeType.fromName("foo.C").name()
