@@ -38,6 +38,8 @@ __all__ = (
 	"XDG_CONFIG_DIRS",
 	"XDG_CACHE_HOME",
 	"XDG_RUNTIME_DIR",
+	"XDG_DESKTOP_DIR",
+	"XDG_DOWNLOAD_DIR",
 )
 
 # Always points to the user's home directory
