@@ -3,13 +3,20 @@ Implementation of the XDG Desktop Entry spec version 1.1.
 http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.1.html
 """
 import os
+import re
 import shlex
+try:
+	from urllib.parse import quote
+except ImportError:
+	# Python 2 support
+	from urllib import quote
 from .inifile import IniFile
 
 
-def urlify(arg):
-	# stub
-	return arg
+def _urlify(arg):
+	if ":" in arg:
+		return arg
+	return "file://" + quote(arg)
 
 
 class DesktopFile(IniFile):
@@ -34,17 +41,34 @@ class DesktopFile(IniFile):
 	def executable(self):
 		return self.value("Exec")
 
-	def formattedExec(self, *args):
+	def formattedExec(self, args):
 		_exec = shlex.split(self.executable())
-
+		formatted = []
 		for i, arg in enumerate(_exec):
-			arg = arg.replace("%f", args[0])
-			arg = arg.replace("%F", " ".join(args))
-			arg = arg.replace("%f", urlify(args[0]))
-			arg = arg.replace("%U", " ".join(urlify(x) for x in args))
-			_exec[i] = arg
+			if i == 0:
+				# skip the executable name
+				formatted.append(arg)
+				continue
 
-		return _exec
+			if "%f" in arg:
+				formatted.append(arg.replace("%f", args[0]))
+
+			elif "%F" in arg:
+				formatted += [arg.replace("%F", args[0])] + args[1:]
+
+			elif "%u" in arg:
+				formatted.append(_urlify(args[0]))
+
+			elif "%U" in arg:
+				formatted += [arg.replace("%U", _urlify(args[0]))] + [_urlify(x) for x in args[1:]]
+
+			elif "%%" in arg:
+				formatted.append(arg.replace("%%", "%"))
+
+			else:
+				formatted.append(arg)
+
+		return formatted
 
 	def name(self):
 		return self.translatedValue("Name")

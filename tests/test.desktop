@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=test
+MimeType=application/x-xdg-text;
+Exec=env VAR="/tmp/test folder/foo" %f %F %u %U %% --args=%F
+NoDisplay=true
+StartupNotify=true
+Icon=1CD8_rundll32.0

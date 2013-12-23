@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Tests for python-mime
+MIME type tests for python-xdg
 
 >>> import os
 >>> from xdg.mime import MimeType
@@ -115,8 +115,8 @@ False
 >>> MimeType.fromContent(f.name).name()
 'text/plain'
 >>> os.remove(f.name)
-
 """
+
 
 if __name__ == "__main__":
 	import doctest
