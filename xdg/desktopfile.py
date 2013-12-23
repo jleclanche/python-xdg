@@ -4,7 +4,7 @@ http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.1.html
 """
 import os
 import shlex
-from xdg.inifile import IniFile
+from .inifile import IniFile
 
 
 def urlify(arg):
