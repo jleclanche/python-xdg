@@ -3,6 +3,7 @@ Implementation of the XDG Desktop Entry spec version 1.1.
 http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.1.html
 """
 import os
+import shlex
 from xdg.inifile import IniFile
 
 
@@ -34,7 +35,7 @@ class DesktopFile(IniFile):
 		return self.value("Exec")
 
 	def formattedExec(self, *args):
-		_exec = self.executable().split()
+		_exec = shlex.split(self.executable())
 
 		for i, arg in enumerate(_exec):
 			arg = arg.replace("%f", args[0])
