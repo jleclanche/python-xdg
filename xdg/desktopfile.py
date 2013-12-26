@@ -16,7 +16,7 @@ from .inifile import IniFile
 def _urlify(arg):
 	if ":" in arg:
 		return arg
-	return "file://" + quote(arg)
+	return "file://" + quote(os.path.realpath(arg))
 
 
 class DesktopFile(IniFile):
