@@ -605,9 +605,9 @@ class MimeType(BaseMimeType):
 
 	# MIME Actions
 
-	def associations(self):
+	def applications(self):
 		from . import actions
-		return actions.associationsFor(self.name())
+		return actions.applicationsFor(self.name())
 
 	def bestApplication(self):
 		from . import actions

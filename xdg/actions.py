@@ -97,7 +97,7 @@ class CacheFile(IniFile):
 					continue
 				self.sections[mime].insert(0, app)
 
-	def associationsFor(self, mime, exclude=[]):
+	def applicationsFor(self, mime, exclude=[]):
 		if mime in self.sections:
 			return [app for app in self.sections[mime] if app not in exclude]
 		return []
@@ -150,7 +150,7 @@ def bestApplications(mime):
 			yield assoc
 
 	# Finally, check the cached associations
-	associations = CACHE.associationsFor(mime.name(), exclude=ACTIONS.removedAssociations(mime.name()))
+	associations = CACHE.applicationsFor(mime.name(), exclude=ACTIONS.removedAssociations(mime.name()))
 	for assoc in associations:
 		if getDesktopFilePath(assoc):
 			yield assoc
@@ -180,7 +180,7 @@ def bestAvailableApplication(mime):
 	"""
 	return next(bestAvailableApplications(mime), None)
 
-def associationsFor(mime):
+def applicationsFor(mime):
 	ret = []
 	x = ACTIONS.defaultApplication(mime)
 	if x:
@@ -188,6 +188,6 @@ def associationsFor(mime):
 
 	ret += ACTIONS.addedAssociations(mime)
 
-	ret += CACHE.associationsFor(mime, exclude=ACTIONS.removedAssociations(mime))
+	ret += CACHE.applicationsFor(mime, exclude=ACTIONS.removedAssociations(mime))
 
 	return ret
