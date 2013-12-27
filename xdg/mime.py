@@ -609,25 +609,71 @@ class MimeType(BaseMimeType):
 	# MIME Actions
 
 	def applications(self):
+		"""
+		Returns a list of applications suitable to open the MIME type
+		Applications are returned in order from most to least suitable
+		"""
 		from . import actions
-		return actions.applicationsFor(self.name())
+		ret = []
+		default = self.defaultApplication()
+		if default:
+			ret.append(default)
 
-	def bestApplication(self):
-		from . import actions
-		return actions.bestApplication(self.name())
+		ret += actions.MIME_ACTIONS_LIST.addedAssociations(self)
+
+		ret += actions.MIME_ACTIONS_CACHE.applicationsFor(self, exclude=actions.MIME_ACTIONS_LIST.removedAssociations(self))
+
+		return ret
 
 	def bestApplications(self):
+		"""
+		Returns a generator of the applications able to open \a mime, from
+		most to least fitting choice.
+		- MIME types are always unaliased first.
+		- The default application is next
+		- The user-added associations are next
+		- The cached associations are next
+		- If we still haven't found anything, the process is repeated for
+		each of the MIME type's parents (recursively)
+
+		NOTE: This function does NOT check for the presence of .desktop files
+		on the file system. This should be done separately, or you can use
+		the convenience function bestAvailableApplications()
+		"""
 		from . import actions
+
 		return actions.bestApplications(self.name())
 
-	def bestAvailableApplication(self):
-		from . import actions
-		return actions.bestAvailableApplication(self.name())
+	def bestApplication(self):
+		"""
+		Convenience function that returns the first best-fitting application
+		to open a \a mime
+
+		NOTE: This function does NOT check for the presence of .desktop files
+		on the file system. This should be done separately, or you can use
+		the convenience function bestAvailableApplication()
+		"""
+		return next(self.bestApplications(), None)
 
 	def bestAvailableApplications(self):
-		from . import actions
-		return actions.bestAvailableApplications(self.name())
+		"""
+		Same as bestApplications(), but checks if the .desktop files are
+		available on the file system.
+		"""
+		from .desktopfile import getDesktopFilePath
+
+		for app in self.bestApplications():
+			desktop = getDesktopFilePath(app)
+			if desktop:
+				yield desktop
+
+	def bestAvailableApplication(self):
+		"""
+		Same as bestApplication(), but checks if the .desktop files are
+		available on the file system.
+		"""
+		return next(self.bestApplications(), None)
 
 	def defaultApplication(self):
 		from . import actions
-		return actions.defaultApplication(self.name())
+		return actions.MIME_ACTIONS_LIST.defaultApplication(self.name())

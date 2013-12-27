@@ -106,35 +106,8 @@ MIME_ACTIONS_CACHE = MimeActionsCacheFile()
 for f in xdg.getFiles("applications/mimeinfo.cache"):
 	MIME_ACTIONS_CACHE.parse(f)
 
-def defaultApplication(mime):
-	return MIME_ACTIONS_LIST.defaultApplication(mime)
-
-def bestApplication(mime):
-	"""
-	Convenience function that returns the first best-fitting application
-	to open a \a mime
-
-	NOTE: This function does NOT check for the presence of .desktop files
-	on the file system. This should be done separately, or you can use
-	the convenience function bestAvailableApplication()
-	"""
-	return next(bestApplications(mime), None)
 
 def bestApplications(mime):
-	"""
-	Returns a generator of the applications able to open \a mime, from
-	most to least fitting choice.
-	 - MIME types are always unaliased first.
-	 - The default application is next
-	 - The user-added associations are next
-	 - The cached associations are next
-	 - If we still haven't found anything, the process is repeated for
-	   each of the MIME type's parents (recursively)
-
-	NOTE: This function does NOT check for the presence of .desktop files
-	on the file system. This should be done separately, or you can use
-	the convenience function bestAvailableApplications()
-	"""
 	# Unalias the mime type if necessary
 	mime = unalias(mime)
 
@@ -162,32 +135,3 @@ def bestApplications(mime):
 			yield ret
 
 	# No application found
-
-def bestAvailableApplications(mime):
-	"""
-	Same as bestApplications(), but checks if the .desktop files are
-	available on the file system.
-	"""
-	for app in bestApplications(mime):
-		desktop = getDesktopFilePath(app)
-		if desktop:
-			yield desktop
-
-def bestAvailableApplication(mime):
-	"""
-	Same as bestApplication(), but checks if the .desktop files are
-	available on the file system.
-	"""
-	return next(bestAvailableApplications(mime), None)
-
-def applicationsFor(mime):
-	ret = []
-	x = MIME_ACTIONS_LIST.defaultApplication(mime)
-	if x:
-		return ret.append(x)
-
-	ret += MIME_ACTIONS_LIST.addedAssociations(mime)
-
-	ret += MIME_ACTIONS_CACHE.applicationsFor(mime, exclude=MIME_ACTIONS_LIST.removedAssociations(mime))
-
-	return ret
