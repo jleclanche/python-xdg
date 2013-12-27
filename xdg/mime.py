@@ -436,6 +436,9 @@ class BaseMimeType(object):
 			return self.name() == other.name()
 		return self.name() == other
 
+	def __hash__(self):
+		return self.name().__hash__()
+
 	def __str__(self):
 		return self.name()
 
