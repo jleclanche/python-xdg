@@ -20,6 +20,14 @@ def _urlify(arg):
 
 
 class DesktopFile(IniFile):
+	@classmethod
+	def lookup(cls, name):
+		instance = cls()
+		path = getDesktopFilePath(name)
+		if path:
+			instance.parse(path)
+		return instance
+
 	def parseKeys(self):
 		d = self.sections["Desktop Entry"] = {}
 		for k, v in self.cfg.items("Desktop Entry"):
