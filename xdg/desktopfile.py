@@ -59,16 +59,16 @@ class DesktopFile(IniFile):
 				continue
 
 			if "%f" in arg:
-				formatted.append(arg.replace("%f", args[0]))
+				formatted.append(arg.replace("%f", args and args[0] or ""))
 
 			elif "%F" in arg:
-				formatted += [arg.replace("%F", args[0])] + args[1:]
+				formatted += [arg.replace("%F", args and args[0] or "")] + args[1:]
 
 			elif "%u" in arg:
-				formatted.append(_urlify(args[0]))
+				formatted.append(args and _urlify(args[0]) or "")
 
 			elif "%U" in arg:
-				formatted += [arg.replace("%U", _urlify(args[0]))] + [_urlify(x) for x in args[1:]]
+				formatted += [arg.replace("%U", args and _urlify(args[0]) or "")] + [_urlify(x) for x in args[1:]]
 
 			elif "%%" in arg:
 				formatted.append(arg.replace("%%", "%"))
@@ -76,7 +76,7 @@ class DesktopFile(IniFile):
 			else:
 				formatted.append(arg)
 
-		return formatted
+		return [x for x in formatted if x]
 
 	def name(self):
 		return self.translatedValue("Name")
