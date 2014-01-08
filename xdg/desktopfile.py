@@ -20,6 +20,22 @@ def _urlify(arg):
 
 
 class DesktopFile(IniFile):
+	def __init__(self):
+		self.sections = {}
+
+	def get(self, section, key, default=None):
+		return self.sections[section].get(key, default)
+
+	def parse(self, path):
+		try:
+			from configparser import RawConfigParser
+		except ImportError:
+			from ConfigParser import RawConfigParser
+		with open(path, "r", encoding="utf-8") as file:
+			self.cfg = RawConfigParser()
+			self.cfg.readfp(file)
+			self.parseKeys()
+
 	@classmethod
 	def lookup(cls, name):
 		instance = cls()
