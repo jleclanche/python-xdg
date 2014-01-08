@@ -10,7 +10,7 @@ def getFiles(name):
 	ret = []
 	for dir in XDG_DATA_DIRS:
 		path = os.path.join(dir, name)
-		if os.path.exists(path):
+		if path not in ret and os.path.exists(path):
 			ret.append(path)
 	return ret
 
