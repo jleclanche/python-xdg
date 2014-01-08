@@ -12,15 +12,17 @@ CLASSIFIERS = [
 	"Programming Language :: Python",
 ]
 
+import xdg
+
 setup(
 	name = "python-xdg",
 	packages = ["xdg"],
-	author = "Jerome Leclanche",
-	author_email = "adys.wh@gmail.com",
+	author = xdg.__author__,
+	author_email = xdg.__email__,
 	classifiers = CLASSIFIERS,
 	description = "Implementation of various Freedesktop xdg specs",
 	download_url = "https://github.com/Adys/python-xdg/tarball/master",
 	#long_description = README,
-	url = "http://github.com/Adys/python-xdg",
-	version = "0.8",
+	url = "https://github.com/Adys/python-xdg",
+	version = xdg.__version__,
 )
