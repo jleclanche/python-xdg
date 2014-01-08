@@ -137,7 +137,8 @@ class GlobsFile(object):
 						# ref: https://bugs.freedesktop.org/show_bug.cgi?id=47950
 						if mime not in self._extensionsFor:
 							self._extensionsFor[str(mime)] = []
-						self._extensionsFor[str(mime)].append(extension)
+						if extension not in self._extensionsFor[str(mime)]:
+							self._extensionsFor[str(mime)].append(extension)
 
 				else:
 					self._matches.append((int(weight), mime, glob, flags))
@@ -397,7 +398,8 @@ class SubclassesFile(BaseFile):
 				mime, subclass = line.split(" ")
 				if mime not in self._keys:
 					self._keys[mime] = []
-				self._keys[mime].append(subclass)
+				if subclass not in self._keys[mime]:
+					self._keys[mime].append(subclass)
 
 SUBCLASSES = SubclassesFile()
 for path in xdg.getFiles("mime/subclasses"):
