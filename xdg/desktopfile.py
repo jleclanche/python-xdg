@@ -46,6 +46,10 @@ class DesktopFile(IniFile):
 	def comment(self):
 		return self.translatedValue("Comment")
 
+	def exec_(self, args=[]):
+		import subprocess
+		subprocess.Popen(self.formattedExec(args))
+
 	def executable(self):
 		return self.value("Exec")
 
