@@ -610,10 +610,10 @@ class MimeType(BaseMimeType):
 
 	# MIME Actions
 
-	def applications(self):
+	def associations(self):
 		"""
-		Returns a list of applications suitable to open the MIME type
-		Applications are returned in order from most to least suitable
+		Returns a list of applications that have been associated (by the user)
+		to the MIME type.
 		"""
 		from . import actions
 		ret = []
@@ -621,15 +621,15 @@ class MimeType(BaseMimeType):
 		if default:
 			ret.append(default)
 
-		ret += actions.MIME_ACTIONS_LIST.addedAssociations(self)
+		ret += actions.ACTIONS_LIST.addedAssociations(self.name())
 
-		ret += actions.MIME_ACTIONS_CACHE.applicationsFor(self, exclude=actions.MIME_ACTIONS_LIST.removedAssociations(self))
+		ret += actions.ACTIONS_CACHE.applicationsFor(self.name(), exclude=actions.ACTIONS_LIST.removedAssociations(self))
 
 		return ret
 
-	def bestApplications(self):
+	def applications(self):
 		"""
-		Returns a generator of the applications able to open \a mime, from
+		Returns a generator of the applications able to open the MIME type, from
 		most to least fitting choice.
 		- MIME types are always unaliased first.
 		- The default application is next
@@ -644,7 +644,7 @@ class MimeType(BaseMimeType):
 		"""
 		from . import actions
 
-		return actions.bestApplications(self.name())
+		return actions.associationsForMimeType(self)
 
 	def bestApplication(self):
 		"""
@@ -657,14 +657,14 @@ class MimeType(BaseMimeType):
 		"""
 		return next(self.bestApplications(), None)
 
-	def bestAvailableApplications(self):
+	def availableApplications(self):
 		"""
 		Same as bestApplications(), but checks if the .desktop files are
 		available on the file system.
 		"""
 		from .desktopfile import getDesktopFilePath
 
-		for app in self.bestApplications():
+		for app in self.applications():
 			desktop = getDesktopFilePath(app)
 			if desktop:
 				yield desktop
@@ -678,4 +678,4 @@ class MimeType(BaseMimeType):
 
 	def defaultApplication(self):
 		from . import actions
-		return actions.MIME_ACTIONS_LIST.defaultApplication(self.name())
+		return actions.ACTIONS_LIST.defaultApplication(self.name())
