@@ -79,7 +79,7 @@ def associationsForMimeType(mime):
 		yield assoc
 
 	# Finally, check the cached associations
-	associations = ACTIONS_CACHE.applicationsFor(mime.name(), exclude=ACTIONS_LIST.removedAssociations(mime.name()))
+	associations = ACTIONS_CACHE.applicationsForMimeType(mime.name(), exclude=ACTIONS_LIST.removedAssociations(mime.name()))
 	for assoc in associations:
 		yield assoc
 
