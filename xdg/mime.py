@@ -509,6 +509,10 @@ class BaseMimeType(object):
 	def name(self):
 		return self._name
 
+	def subClassOf(self):
+		# Should be implemented if the MIME type implementation supports subclassing
+		return []
+
 	def subtype(self):
 		return self.name().split("/")[1]
 
