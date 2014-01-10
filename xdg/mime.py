@@ -504,7 +504,12 @@ class BaseMimeType(object):
 		return name == DEFAULT_BINARY or name == DEFAULT_TEXT
 
 	def isInstance(self, other):
-		return self == other or other in self.subClassOf()
+		if self == other:
+			return True
+		for mime in self.subClassOf():
+			if mime.isInstance(other):
+				return True
+		return False
 
 	def name(self):
 		return self._name

@@ -73,6 +73,12 @@ True
 True
 >>> MimeType("text/plain").isInstance("application/zip")
 False
+>>> MimeType("application/vnd.android.package-archive").subClassOf()
+[<MimeType: application/x-java-archive>]
+>>> MimeType("application/vnd.android.package-archive").isInstance("application/x-java-archive")
+True
+>>> MimeType("application/vnd.android.package-archive").isInstance("application/zip")
+True
 
 # icons / extensions
 >>> MimeType("application/zip").genericIcon()
