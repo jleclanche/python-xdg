@@ -21,6 +21,11 @@ FREEDESKTOP_NS = "http://www.freedesktop.org/standards/shared-mime-info"
 
 TEXTCHARS = bytes("".join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100)))), "utf-8")
 
+INODE = "inode"
+TEXT = "text"
+X_CONTENT = "x-content"
+X_SCHEME_HANDLER = "x-scheme-handler"
+
 def _isBinaryString(bytes):
 	"""
 	Determine if a string is classified as binary rather than text.
@@ -407,11 +412,10 @@ for path in xdg.getFiles("mime/subclasses"):
 
 
 class BaseMimeType(object):
+	FORMAT = "%s/%s"
+
 	DEFAULT_TEXT = "text/plain"
 	DEFAULT_BINARY = "application/octet-stream"
-	SCHEME_FORMAT = "x-scheme-handler/%s"
-	ZERO_SIZE = "application/x-zerosize"
-
 	INODE_MOUNTPOINT = "inode/mount-point"
 	INODE_BLOCKDEVICE = "inode/blockdevice"
 	INODE_CHARDEVICE = "inode/chardevice"
@@ -419,6 +423,7 @@ class BaseMimeType(object):
 	INODE_FIFO = "inode/fifo"
 	INODE_SYMLINK = "inode/symlink"
 	INODE_SOCKET = "inode/socket"
+	ZERO_SIZE = "application/x-zerosize"
 
 	def __init__(self, mime):
 		mime = str(mime)
@@ -488,7 +493,7 @@ class BaseMimeType(object):
 		if not scheme:
 			raise ValueError("%r does not have a scheme or is not a valid URI" % (scheme))
 
-		return cls(cls.SCHEME_FORMAT % (scheme))
+		return cls(cls.FORMAT % (X_SCHEME_HANDLER, scheme))
 
 	def genericIcon(self):
 		return self.genericMime().name().replace("/", "-")
