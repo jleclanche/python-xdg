@@ -55,7 +55,7 @@ class ActionsCacheFile(IniFile):
 	"""
 
 	def applicationsForMimeType(self, mime, exclude=[]):
-		if mime in self.has_option(MIME_CACHE, mime):
+		if self.has_option(MIME_CACHE, mime):
 			return [app for app in self.getlist(MIME_CACHE, mime) if app not in exclude]
 		return []
 
