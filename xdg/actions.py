@@ -27,6 +27,7 @@ REMOVED_ASSOCIATIONS = "Removed Associations"
 DEFAULT_APPLICATIONS = "Default Applications"
 
 MIME_CACHE = "MIME Cache"
+CATEGORY_CACHE = "Category Cache"
 
 
 class ActionsListFile(IniFile):
@@ -57,6 +58,11 @@ class ActionsCacheFile(IniFile):
 	def applicationsForMimeType(self, mime, exclude=[]):
 		if self.has_option(MIME_CACHE, mime):
 			return [app for app in self.getlist(MIME_CACHE, mime) if app not in exclude]
+		return []
+
+	def applicationsForCategory(self, category, exclude=[]):
+		if self.has_option(CATEGORY_CACHE, category):
+			return [app for app in self.getlist(CATEGORY_CACHE, category) if app not in exclude]
 		return []
 
 ACTIONS_CACHE = ActionsCacheFile()
