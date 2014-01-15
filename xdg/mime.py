@@ -644,7 +644,7 @@ class MimeType(BaseMimeType):
 
 		return ret
 
-	def applications(self):
+	def applications(self, action=actions.ACTION_ALL):
 		"""
 		Returns a generator of the applications able to open the MIME type, from
 		most to least fitting choice.
@@ -663,9 +663,9 @@ class MimeType(BaseMimeType):
 		# Unalias the mime type if necessary
 		# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
 		mime = unalias(self)
-		return actions.associationsForMimeType(mime)
+		return actions.associationsForMimeType(mime, action=action)
 
-	def bestApplication(self):
+	def bestApplication(self, action=actions.ACTION_ALL):
 		"""
 		Convenience function that returns the first best-fitting application
 		to open a \a mime
@@ -674,26 +674,26 @@ class MimeType(BaseMimeType):
 		on the file system. This should be done separately, or you can use
 		the convenience function bestAvailableApplication()
 		"""
-		return next(self.applications(), None)
+		return next(self.applications(action=action), None)
 
-	def availableApplications(self):
+	def availableApplications(self, action=actions.ACTION_ALL):
 		"""
 		Same as bestApplications(), but checks if the .desktop files are
 		available on the file system.
 		"""
 		from .desktopfile import getDesktopFilePath
 
-		for app in self.applications():
+		for app in self.applications(action=action):
 			desktop = getDesktopFilePath(app)
 			if desktop:
 				yield app
 
-	def bestAvailableApplication(self):
+	def bestAvailableApplication(self, action=actions.ACTION_ALL):
 		"""
 		Same as bestApplication(), but checks if the .desktop files are
 		available on the file system.
 		"""
-		return next(self.availableApplications(), None)
+		return next(self.availableApplications(action=action), None)
 
 	def defaultApplication(self):
 		return actions.ACTIONS_LIST.defaultApplication(self.name())

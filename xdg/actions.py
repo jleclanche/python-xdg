@@ -87,7 +87,7 @@ ACTIONS_CACHE = ActionsCacheFile()
 ACTIONS_CACHE.read_merged(xdg.getFiles("applications/mimeinfo.cache")[::-1])
 
 
-def associationsForMimeType(mime):
+def associationsForMimeType(mime, action=ACTION_ALL):
 	# First, check if the default app is defined
 	ret = ACTIONS_LIST.defaultApplication(mime.name())
 	if ret and getDesktopFilePath(ret):
@@ -99,13 +99,13 @@ def associationsForMimeType(mime):
 		yield assoc
 
 	# Finally, check the cached associations
-	associations = ACTIONS_CACHE.applicationsForMimeType(mime.name(), exclude=ACTIONS_LIST.removedAssociations(mime.name()))
+	associations = ACTIONS_CACHE.applicationsForMimeType(mime.name(), exclude=ACTIONS_LIST.removedAssociations(mime.name()), action=action)
 	for assoc in associations:
 		yield assoc
 
 	# If we still don't have anything, try the mime's parents one by one
 	for mime in mime.subClassOf():
-		for assoc in associationsForMimeType(mime):
+		for assoc in associationsForMimeType(mime, action=action):
 			yield assoc
 
 	# No application found
