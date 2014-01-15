@@ -25,6 +25,8 @@ from .inifile import IniFile, NoSectionError
 ADDED_ASSOCIATIONS = "Added Associations"
 REMOVED_ASSOCIATIONS = "Removed Associations"
 DEFAULT_APPLICATIONS = "Default Applications"
+DEFAULT_EDIT_APPLICATIONS = "Default Edit Applications"
+DEFAULT_VIEW_APPLICATIONS = "Default View Applications"
 
 MIME_CACHE = "MIME Cache"
 MIME_VIEW_CACHE = "MIME View Cache"
@@ -50,8 +52,13 @@ class ActionsListFile(IniFile):
 	def removedAssociations(self, mime):
 		return self.getlist(REMOVED_ASSOCIATIONS, mime, [])
 
-	def defaultApplication(self, mime):
-		return self.getdefault(DEFAULT_APPLICATIONS, mime, None)
+	def defaultApplication(self, mime, action=ACTION_ALL):
+		if action == ACTION_EDIT:
+			return self.getdefault(DEFAULT_EDIT_APPLICATIONS, mime, None)
+		if action == ACTION_VIEW:
+			return self.getdefault(DEFAULT_VIEW_APPLICATIONS, mime, None)
+		elif action & ACTION_OPEN:
+			return self.getdefault(DEFAULT_APPLICATIONS, mime, None)
 
 ACTIONS_LIST = ActionsListFile()
 ACTIONS_LIST.read_merged(xdg.getFiles("applications/mimeapps.list")[::-1])
@@ -89,7 +96,7 @@ ACTIONS_CACHE.read_merged(xdg.getFiles("applications/mimeinfo.cache")[::-1])
 
 def associationsForMimeType(mime, action=ACTION_ALL):
 	# First, check if the default app is defined
-	ret = ACTIONS_LIST.defaultApplication(mime.name())
+	ret = ACTIONS_LIST.defaultApplication(mime.name(), action=action)
 	if ret and getDesktopFilePath(ret):
 		yield ret
 
