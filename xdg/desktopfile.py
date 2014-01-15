@@ -23,44 +23,23 @@ def _urlify(arg):
 
 
 class DesktopFile(IniFile):
-	def __init__(self):
-		self.sections = {}
-
-	def get(self, section, key, default=None):
-		return self.sections[section].get(key, default)
-
-	def parse(self, path):
-		try:
-			from configparser import RawConfigParser
-		except ImportError:
-			from ConfigParser import RawConfigParser
-		with open(path, "r", encoding="utf-8") as file:
-			self.cfg = RawConfigParser()
-			self.cfg.readfp(file)
-			self.parseKeys()
-
 	@classmethod
 	def lookup(cls, name):
 		instance = cls()
 		path = getDesktopFilePath(name)
 		if path:
-			instance.parse(path)
+			instance.read(path)
 			return instance
-
-	def parseKeys(self):
-		d = self.sections[DESKTOP_ENTRY] = {}
-		for k, v in self.cfg.items(DESKTOP_ENTRY):
-			d[k] = v
 
 	def translatedValue(self, key, lang=None):
 		key = key.lower()
 		if lang:
 			key = "%s[%s]" % (key, lang)
-		return self.sections[DESKTOP_ENTRY].get(key)
+		return self.getdefault(DESKTOP_ENTRY, key)
 
 	def value(self, key):
 		key = key.lower()
-		return self.sections[DESKTOP_ENTRY].get(key)
+		return self.getdefault(DESKTOP_ENTRY, key)
 
 	def comment(self):
 		return self.translatedValue("Comment")
