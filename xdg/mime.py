@@ -14,6 +14,7 @@ import os
 import struct
 from fnmatch import fnmatch
 from xml.dom import minidom, XML_NAMESPACE
+from . import actions
 from . import xdg
 
 
@@ -629,7 +630,6 @@ class MimeType(BaseMimeType):
 		Returns a list of applications that have been associated (by the user)
 		to the MIME type.
 		"""
-		from . import actions
 		ret = []
 		default = self.defaultApplication()
 		if default:
@@ -656,7 +656,6 @@ class MimeType(BaseMimeType):
 		on the file system. This should be done separately, or you can use
 		the convenience function bestAvailableApplications()
 		"""
-		from . import actions
 
 		# Unalias the mime type if necessary
 		# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
@@ -694,5 +693,4 @@ class MimeType(BaseMimeType):
 		return next(self.availableApplications(), None)
 
 	def defaultApplication(self):
-		from . import actions
 		return actions.ACTIONS_LIST.defaultApplication(self.name())
