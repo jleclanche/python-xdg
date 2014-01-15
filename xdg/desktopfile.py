@@ -42,7 +42,7 @@ class DesktopFile(IniFile):
 		path = getDesktopFilePath(name)
 		if path:
 			instance.parse(path)
-		return instance
+			return instance
 
 	def parseKeys(self):
 		d = self.sections["Desktop Entry"] = {}
