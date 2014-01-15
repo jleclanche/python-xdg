@@ -658,7 +658,10 @@ class MimeType(BaseMimeType):
 		"""
 		from . import actions
 
-		return actions.associationsForMimeType(self)
+		# Unalias the mime type if necessary
+		# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
+		mime = unalias(self)
+		return actions.associationsForMimeType(mime)
 
 	def bestApplication(self):
 		"""

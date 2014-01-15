@@ -20,7 +20,7 @@ The implementation is in two parts:
 from . import xdg
 from .desktopfile import getDesktopFilePath
 from .inifile import IniFile, NoSectionError
-from .mime import unalias
+
 
 ADDED_ASSOCIATIONS = "Added Associations"
 REMOVED_ASSOCIATIONS = "Removed Associations"
@@ -88,10 +88,6 @@ ACTIONS_CACHE.read_merged(xdg.getFiles("applications/mimeinfo.cache")[::-1])
 
 
 def associationsForMimeType(mime):
-	# Unalias the mime type if necessary
-	# see http://lists.freedesktop.org/archives/xdg/2010-March/011336.html
-	mime = unalias(mime)
-
 	# First, check if the default app is defined
 	ret = ACTIONS_LIST.defaultApplication(mime.name())
 	if ret and getDesktopFilePath(ret):
