@@ -13,6 +13,9 @@ except ImportError:
 from .inifile import IniFile
 
 
+DESKTOP_ENTRY = "Desktop Entry"
+
+
 def _urlify(arg):
 	if ":" in arg:
 		return arg
@@ -45,19 +48,19 @@ class DesktopFile(IniFile):
 			return instance
 
 	def parseKeys(self):
-		d = self.sections["Desktop Entry"] = {}
-		for k, v in self.cfg.items("Desktop Entry"):
+		d = self.sections[DESKTOP_ENTRY] = {}
+		for k, v in self.cfg.items(DESKTOP_ENTRY):
 			d[k] = v
 
 	def translatedValue(self, key, lang=None):
 		key = key.lower()
 		if lang:
 			key = "%s[%s]" % (key, lang)
-		return self.sections["Desktop Entry"].get(key)
+		return self.sections[DESKTOP_ENTRY].get(key)
 
 	def value(self, key):
 		key = key.lower()
-		return self.sections["Desktop Entry"].get(key)
+		return self.sections[DESKTOP_ENTRY].get(key)
 
 	def comment(self):
 		return self.translatedValue("Comment")
