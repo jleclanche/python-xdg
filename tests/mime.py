@@ -89,6 +89,12 @@ True
 'text-x-generic'
 >>> MimeType("application/x-bzip").extensions()
 ['.bz', '.bz2']
+>>> MimeType("application/x-java-archive").extensions()
+['.jar']
+
+# test for globs weights
+>>> MimeType.fromName("foo.png")
+<MimeType: image/png>
 
 # from* classmethods
 >>> MimeType.fromName("foo.TXT").name()

@@ -10,6 +10,7 @@ update-mime-database command, which is provided by the freedesktop.org
 shared mime database package.
 """
 
+import operator
 import os
 import struct
 from fnmatch import fnmatch
@@ -136,7 +137,9 @@ class GlobsFile(object):
 				elif glob.startswith("*.") and "cs" not in flags:
 					extension = glob[1:]
 					if "*" not in extension and "?" not in extension and "[" not in extension:
-						self._extensions[extension] = mime
+						if extension not in self._extensions:
+							self._extensions[extension] = []
+						self._extensions[extension].append((int(weight), mime))
 						# Add the mime type to the extensionsFor dict
 						# It has to keep the order intact, as we want eg. file save dialogs to
 						# be able to rely on getting the "best extension" (always the first one)
@@ -155,9 +158,9 @@ class GlobsFile(object):
 
 		_, extension = os.path.splitext(name)
 		if extension in self._extensions:
-			return self._extensions[extension]
+			return max(self._extensions[extension], key=operator.itemgetter(0))[1]
 		elif extension.lower() in self._extensions:
-			return self._extensions[extension.lower()]
+			return max(self._extensions[extension.lower()], key=operator.itemgetter(0))[1]
 
 		matches = []
 		for weight, mime, glob, flags in self._matches:
