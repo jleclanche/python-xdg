@@ -669,7 +669,7 @@ class MimeType(BaseMimeType):
 		on the file system. This should be done separately, or you can use
 		the convenience function bestAvailableApplication()
 		"""
-		return next(self.bestApplications(), None)
+		return next(self.applications(), None)
 
 	def availableApplications(self):
 		"""
@@ -681,14 +681,14 @@ class MimeType(BaseMimeType):
 		for app in self.applications():
 			desktop = getDesktopFilePath(app)
 			if desktop:
-				yield desktop
+				yield app
 
 	def bestAvailableApplication(self):
 		"""
 		Same as bestApplication(), but checks if the .desktop files are
 		available on the file system.
 		"""
-		return next(self.bestApplications(), None)
+		return next(self.availableApplications(), None)
 
 	def defaultApplication(self):
 		from . import actions
