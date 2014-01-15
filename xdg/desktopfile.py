@@ -22,6 +22,10 @@ def _urlify(arg):
 	return "file://" + quote(os.path.realpath(arg))
 
 
+class InvalidDesktopFile(Exception):
+	pass
+
+
 class DesktopFile(IniFile):
 	@classmethod
 	def lookup(cls, name):
@@ -30,6 +34,12 @@ class DesktopFile(IniFile):
 		if path:
 			instance.read(path)
 			return instance
+
+	def read(self, *args, **kwargs):
+		ret = super(DesktopFile, self).read(*args, **kwargs)
+		if not self.has_section(DESKTOP_ENTRY):
+			raise InvalidDesktopFile("The desktop file is missing a %r section" % (DESKTOP_ENTRY))
+		return ret
 
 	def translatedValue(self, key, lang=None):
 		key = key.lower()
