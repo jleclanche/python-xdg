@@ -77,7 +77,7 @@ class ActionsCacheFile(IniFile):
 		}
 		for key in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
 			if action & key:
-				ret += self._get_apps(action_keys[key], mime, exclude)
+				ret += [app for app in self._get_apps(action_keys[key], mime, exclude) if app not in ret]
 		return ret
 
 	def applicationsForCategory(self, category, exclude=[]):
