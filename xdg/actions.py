@@ -54,6 +54,7 @@ MIME_CACHE = {
 }
 
 CATEGORY_CACHE = "Category Cache"
+INTENTS_CACHE = "Intents Cache"
 
 
 class ActionsListFile(IniFile):
@@ -107,6 +108,9 @@ class ActionsCacheFile(IniFile):
 
 	def applicationsForCategory(self, category, exclude=[]):
 		return self._get_apps(CATEGORY_CACHE, category, exclude)
+
+	def applicationsForIntent(self, intent, exclude=[]):
+		return self._get_apps(INTENTS_CACHE, intent, exclude)
 
 ACTIONS_CACHE = ActionsCacheFile()
 ACTIONS_CACHE.read_merged(xdg.getFiles("applications/mimeinfo.cache")[::-1])
