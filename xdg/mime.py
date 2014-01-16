@@ -627,23 +627,6 @@ class MimeType(BaseMimeType):
 		return [MimeType(mime) for mime in SUBCLASSES.get(self.name(), [])]
 
 	# MIME Actions
-
-	def associations(self):
-		"""
-		Returns a list of applications that have been associated (by the user)
-		to the MIME type.
-		"""
-		ret = []
-		default = self.defaultApplication()
-		if default:
-			ret.append(default)
-
-		ret += actions.ACTIONS_LIST.addedAssociations(self.name())
-
-		ret += actions.ACTIONS_CACHE.applicationsFor(self.name(), exclude=actions.ACTIONS_LIST.removedAssociations(self))
-
-		return ret
-
 	def applications(self, action=actions.ACTION_ALL):
 		"""
 		Returns a generator of the applications able to open the MIME type, from
