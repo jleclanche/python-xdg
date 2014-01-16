@@ -28,22 +28,30 @@ ACTION_VIEW = 0x02
 ACTION_EDIT = 0x04
 ACTION_ALL = ACTION_OPEN | ACTION_VIEW | ACTION_EDIT
 
+ADDED_ASSOCIATIONS = {
+	ACTION_OPEN: "Added Associations",
+	ACTION_VIEW: "Added View Associations",
+	ACTION_EDIT: "Added Edit Associations",
+}
 
-ADDED_ASSOCIATIONS = "Added Associations"
-ADDED_EDIT_ASSOCIATIONS = "Added Edit Associations"
-ADDED_VIEW_ASSOCIATIONS = "Added View Associations"
 REMOVED_ASSOCIATIONS = {
 	ACTION_OPEN: "Removed Associations",
 	ACTION_VIEW: "Removed View Associations",
 	ACTION_EDIT: "Removed Edit Associations",
 }
-DEFAULT_APPLICATIONS = "Default Applications"
-DEFAULT_EDIT_APPLICATIONS = "Default Edit Applications"
-DEFAULT_VIEW_APPLICATIONS = "Default View Applications"
 
-MIME_CACHE = "MIME Cache"
-MIME_VIEW_CACHE = "MIME View Cache"
-MIME_EDIT_CACHE = "MIME Edit Cache"
+DEFAULT_APPLICATIONS = {
+	ACTION_OPEN: "Default Applications",
+	ACTION_VIEW: "Default View Applications",
+	ACTION_EDIT: "Default Edit Applications",
+}
+
+MIME_CACHE = {
+	ACTION_OPEN: "MIME Cache",
+	ACTION_VIEW: "MIME View Cache",
+	ACTION_EDIT: "MIME Edit Cache",
+}
+
 CATEGORY_CACHE = "Category Cache"
 
 
@@ -54,12 +62,9 @@ class ActionsListFile(IniFile):
 	"""
 
 	def addedAssociations(self, mime, action=ACTION_ALL):
-		if action & ACTION_EDIT:
-			return self.getlist(ADDED_EDIT_ASSOCIATIONS, mime, [])
-		elif action & ACTION_VIEW:
-			return self.getlist(ADDED_VIEW_ASSOCIATIONS, mime, [])
-		elif action & ACTION_OPEN:
-			return self.getlist(ADDED_ASSOCIATIONS, mime, [])
+		for flag in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
+			if action & flag:
+				return self.getlist(ADDED_ASSOCIATIONS[flag], mime, [])
 
 	def removedAssociations(self, mime, action=ACTION_ALL):
 		# When asking for ACTION_FOO, we only return the removed assocs for ACTION_FOO
@@ -73,12 +78,9 @@ class ActionsListFile(IniFile):
 		return set(item for removed in lists for item in removed if all(item in removed for removed in lists))
 
 	def defaultApplication(self, mime, action=ACTION_ALL):
-		if action & ACTION_EDIT:
-			return self.getdefault(DEFAULT_EDIT_APPLICATIONS, mime, None)
-		elif action & ACTION_VIEW:
-			return self.getdefault(DEFAULT_VIEW_APPLICATIONS, mime, None)
-		elif action & ACTION_OPEN:
-			return self.getdefault(DEFAULT_APPLICATIONS, mime, None)
+		for flag in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
+			if action & flag:
+				return self.getdefault(DEFAULT_APPLICATIONS[flag], mime, None)
 
 ACTIONS_LIST = ActionsListFile()
 ACTIONS_LIST.read_merged(xdg.getFiles("applications/mimeapps.list")[::-1])
@@ -97,14 +99,9 @@ class ActionsCacheFile(IniFile):
 
 	def applicationsForMimeType(self, mime, exclude=[], action=ACTION_ALL):
 		ret = []
-		action_keys = {
-			ACTION_OPEN: MIME_CACHE,
-			ACTION_VIEW: MIME_VIEW_CACHE,
-			ACTION_EDIT: MIME_EDIT_CACHE,
-		}
-		for key in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
-			if action & key:
-				ret += [app for app in self._get_apps(action_keys[key], mime, exclude) if app not in ret]
+		for flag in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
+			if action & flag:
+				ret += [app for app in self._get_apps(MIME_CACHE[flag], mime, exclude) if app not in ret]
 		return ret
 
 	def applicationsForCategory(self, category, exclude=[]):
