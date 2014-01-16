@@ -20,6 +20,7 @@ The implementation is in two parts:
 from . import xdg
 from .desktopfile import getDesktopFilePath
 from .inifile import IniFile, NoSectionError
+from .utils import OrderedSet
 
 
 # MIME actions
@@ -98,10 +99,10 @@ class ActionsCacheFile(IniFile):
 		return []
 
 	def applicationsForMimeType(self, mime, exclude=[], action=ACTION_ALL):
-		ret = []
+		ret = OrderedSet([])
 		for flag in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
 			if action & flag:
-				ret += [app for app in self._get_apps(MIME_CACHE[flag], mime, exclude) if app not in ret]
+				ret.update(self._get_apps(MIME_CACHE[flag], mime, exclude))
 		return ret
 
 	def applicationsForCategory(self, category, exclude=[]):
