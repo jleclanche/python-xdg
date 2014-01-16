@@ -22,8 +22,21 @@ from .desktopfile import getDesktopFilePath
 from .inifile import IniFile, NoSectionError
 
 
+# MIME actions
+ACTION_OPEN = 0x01
+ACTION_VIEW = 0x02
+ACTION_EDIT = 0x04
+ACTION_ALL = ACTION_OPEN | ACTION_VIEW | ACTION_EDIT
+
+
 ADDED_ASSOCIATIONS = "Added Associations"
-REMOVED_ASSOCIATIONS = "Removed Associations"
+ADDED_EDIT_ASSOCIATIONS = "Added Edit Associations"
+ADDED_VIEW_ASSOCIATIONS = "Added View Associations"
+REMOVED_ASSOCIATIONS = {
+	ACTION_OPEN: "Removed Associations",
+	ACTION_VIEW: "Removed View Associations",
+	ACTION_EDIT: "Removed Edit Associations",
+}
 DEFAULT_APPLICATIONS = "Default Applications"
 DEFAULT_EDIT_APPLICATIONS = "Default Edit Applications"
 DEFAULT_VIEW_APPLICATIONS = "Default View Applications"
@@ -33,12 +46,6 @@ MIME_VIEW_CACHE = "MIME View Cache"
 MIME_EDIT_CACHE = "MIME Edit Cache"
 CATEGORY_CACHE = "Category Cache"
 
-# MIME actions
-ACTION_OPEN = 0x01
-ACTION_VIEW = 0x02
-ACTION_EDIT = 0x04
-ACTION_ALL = ACTION_OPEN | ACTION_VIEW | ACTION_EDIT
-
 
 class ActionsListFile(IniFile):
 	"""
@@ -46,16 +53,29 @@ class ActionsListFile(IniFile):
 	NOTE: Theoretically, this file should only be in $XDG_DATA_HOME
 	"""
 
-	def addedAssociations(self, mime):
-		return self.getlist(ADDED_ASSOCIATIONS, mime, [])
+	def addedAssociations(self, mime, action=ACTION_ALL):
+		if action & ACTION_EDIT:
+			return self.getlist(ADDED_EDIT_ASSOCIATIONS, mime, [])
+		elif action & ACTION_VIEW:
+			return self.getlist(ADDED_VIEW_ASSOCIATIONS, mime, [])
+		elif action & ACTION_OPEN:
+			return self.getlist(ADDED_ASSOCIATIONS, mime, [])
 
-	def removedAssociations(self, mime):
-		return self.getlist(REMOVED_ASSOCIATIONS, mime, [])
+	def removedAssociations(self, mime, action=ACTION_ALL):
+		# When asking for ACTION_FOO, we only return the removed assocs for ACTION_FOO
+		# However, when asking for more than one action, we return the removed assocs
+		# for all those actions.
+		lists = []
+		for flag in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
+			if action & flag:
+				lists.append(self.getlist(REMOVED_ASSOCIATIONS[flag], mime, []))
+
+		return set(item for removed in lists for item in removed if all(item in removed for removed in lists))
 
 	def defaultApplication(self, mime, action=ACTION_ALL):
-		if action == ACTION_EDIT:
+		if action & ACTION_EDIT:
 			return self.getdefault(DEFAULT_EDIT_APPLICATIONS, mime, None)
-		if action == ACTION_VIEW:
+		elif action & ACTION_VIEW:
 			return self.getdefault(DEFAULT_VIEW_APPLICATIONS, mime, None)
 		elif action & ACTION_OPEN:
 			return self.getdefault(DEFAULT_APPLICATIONS, mime, None)
@@ -106,7 +126,7 @@ def associationsForMimeType(mime, action=ACTION_ALL):
 		yield assoc
 
 	# Finally, check the cached associations
-	associations = ACTIONS_CACHE.applicationsForMimeType(mime.name(), exclude=ACTIONS_LIST.removedAssociations(mime.name()), action=action)
+	associations = ACTIONS_CACHE.applicationsForMimeType(mime.name(), exclude=ACTIONS_LIST.removedAssociations(mime.name(), action=action), action=action)
 	for assoc in associations:
 		yield assoc
 
