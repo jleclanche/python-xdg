@@ -28,6 +28,8 @@ MIME type tests for python-xdg
 'text/x-c++src'
 >>> MimeType.fromName("foo.c").name()
 'text/x-csrc'
+>>> print(MimeType.fromName("no-such-file"))
+None
 >>> MimeType.fromInode("/dev/sda").name()
 'inode/blockdevice'
 >>> MimeType.fromInode("/dev/null").name()
@@ -36,6 +38,8 @@ MIME type tests for python-xdg
 'inode/mount-point'
 >>> MimeType.fromInode(".").name()
 'inode/directory'
+>>> print(MimeType.fromInode("no-such-file"))
+None
 >>> MimeType(MimeType("inode/directory")).name()
 'inode/directory'
 
