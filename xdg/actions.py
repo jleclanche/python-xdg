@@ -64,7 +64,7 @@ class ActionsListFile(IniFile):
 	"""
 
 	def addedAssociations(self, mime, action=ACTION_ALL):
-		for flag in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
+		for flag in (ACTION_VIEW, ACTION_EDIT, ACTION_OPEN):
 			if action & flag:
 				return self.getlist(ADDED_ASSOCIATIONS[flag], mime, [])
 
@@ -73,14 +73,15 @@ class ActionsListFile(IniFile):
 		# However, when asking for more than one action, we return the removed assocs
 		# for all those actions.
 		lists = []
-		for flag in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
+		for flag in (ACTION_VIEW, ACTION_EDIT, ACTION_OPEN):
 			if action & flag:
 				lists.append(self.getlist(REMOVED_ASSOCIATIONS[flag], mime, []))
 
 		return set(item for removed in lists for item in removed if all(item in removed for removed in lists))
 
 	def defaultApplication(self, mime, action=ACTION_ALL):
-		for flag in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
+		# The order here is different because it's always user-set (?)
+		for flag in (ACTION_OPEN, ACTION_VIEW, ACTION_EDIT):
 			if action & flag:
 				return self.getdefault(DEFAULT_APPLICATIONS[flag], mime, None)
 
@@ -101,7 +102,7 @@ class ActionsCacheFile(IniFile):
 
 	def applicationsForMimeType(self, mime, exclude=[], action=ACTION_ALL):
 		ret = OrderedSet([])
-		for flag in (ACTION_EDIT, ACTION_VIEW, ACTION_OPEN):
+		for flag in (ACTION_VIEW, ACTION_EDIT, ACTION_OPEN):
 			if action & flag:
 				ret.update(self._get_apps(MIME_CACHE[flag], mime, exclude))
 		return ret
