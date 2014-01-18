@@ -678,5 +678,5 @@ class MimeType(BaseMimeType):
 		"""
 		return next(self.availableApplications(action=action), None)
 
-	def defaultApplication(self):
-		return actions.ACTIONS_LIST.defaultApplication(self.name())
+	def defaultApplication(self, action=actions.ACTION_ALL):
+		return actions.ACTIONS_LIST.defaultApplication(self.name(), action=action)
