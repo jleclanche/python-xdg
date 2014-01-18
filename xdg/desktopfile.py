@@ -27,6 +27,10 @@ class InvalidDesktopFile(Exception):
 
 
 class DesktopFile(IniFile):
+	def __init__(self):
+		self.section = DESKTOP_ENTRY
+		super(DesktopFile, self).__init__()
+
 	@classmethod
 	def lookup(cls, name):
 		instance = cls()
@@ -45,11 +49,11 @@ class DesktopFile(IniFile):
 		key = key.lower()
 		if lang:
 			key = "%s[%s]" % (key, lang)
-		return self.getdefault(DESKTOP_ENTRY, key)
+		return self.getdefault(self.section, key)
 
 	def value(self, key):
 		key = key.lower()
-		return self.getdefault(DESKTOP_ENTRY, key)
+		return self.getdefault(self.section, key)
 
 	def comment(self):
 		return self.translatedValue("Comment")
@@ -92,6 +96,7 @@ class DesktopFile(IniFile):
 
 	def name(self):
 		return self.translatedValue("Name")
+
 
 def getDesktopFilePath(name):
 	"""
