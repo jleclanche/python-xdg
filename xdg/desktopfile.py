@@ -3,8 +3,8 @@ Implementation of the XDG Desktop Entry spec version 1.1.
 http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.1.html
 """
 import os
-import re
 import shlex
+from copy import copy
 try:
 	from urllib.parse import quote
 except ImportError:
@@ -14,6 +14,7 @@ from .inifile import IniFile
 
 
 DESKTOP_ENTRY = "Desktop Entry"
+DESKTOP_ACTION = "Desktop Action %s"
 
 
 def _urlify(arg):
@@ -54,6 +55,15 @@ class DesktopFile(IniFile):
 	def value(self, key):
 		key = key.lower()
 		return self.getdefault(self.section, key)
+
+	def actions(self):
+		return self.getlist(self.section, "Actions")
+
+	def action(self, action):
+		section = DESKTOP_ACTION % (action)
+		ret = copy(self)
+		ret.section = section
+		return ret
 
 	def comment(self):
 		return self.translatedValue("Comment")
