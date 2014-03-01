@@ -21,8 +21,8 @@ setup(
 	author_email = xdg.__email__,
 	classifiers = CLASSIFIERS,
 	description = "Implementation of various Freedesktop xdg specs",
-	download_url = "https://github.com/Adys/python-xdg/tarball/master",
+	download_url = "https://github.com/jleclanche/python-xdg/tarball/master",
 	#long_description = README,
-	url = "https://github.com/Adys/python-xdg",
+	url = "https://github.com/jleclanche/python-xdg",
 	version = xdg.__version__,
 )
