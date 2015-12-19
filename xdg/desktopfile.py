@@ -85,10 +85,10 @@ class DesktopFile(IniFile):
 				continue
 
 			if "%f" in arg:
-				formatted.append(arg.replace("%f", args and args[0] or ""))
+				formatted.append(arg.replace("%f", args and os.path.realpath(args[0]) or ""))
 
 			elif "%F" in arg:
-				formatted += [arg.replace("%F", args and args[0] or "")] + args[1:]
+				formatted += [arg.replace("%F", args and os.path.realpath(args[0]) or "")] + [os.path.realpath(arg) for arg in args[1:]]
 
 			elif "%u" in arg:
 				formatted.append(args and _urlify(args[0]) or "")
